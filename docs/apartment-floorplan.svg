@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 685 1285" width="1370" height="2570">
+  <title>Apartment floor plan</title>
+  <desc>1 unit = 1 cm. Rooms are separate paths with ids for scripting.</desc>
+  <style>
+    .floor { fill: #f4f1ea; }
+    .walls { fill: #2b2b2b; }
+    .leaf  { stroke: #2b2b2b; stroke-width: 3; stroke-linecap: round; }
+    .swing { fill: none; stroke: #2b2b2b; stroke-width: 1.5; stroke-dasharray: 6 4; }
+    .panel { fill: #ffffff; stroke: #2b2b2b; stroke-width: 1.5; }
+    .name  { font: 600 18px Helvetica, Arial, sans-serif; fill: #2b2b2b; text-anchor: middle; }
+    .area  { font: 400 15px Helvetica, Arial, sans-serif; fill: #6b6b6b; text-anchor: middle; }
+  </style>
+  <g id="floors">
+    <path id="kueche" data-name="Küche" class="floor" d="M420,65 L620,65 L620,535 L350,535 L350,335 L420,335 Z"/>
+    <path id="flur" data-name="Flur" class="floor" d="M65,570 L620,570 L620,685 L290,685 L290,855 L190,855 L190,775 L65,775 Z"/>
+    <path id="schlafzimmer" data-name="Schlafzimmer" class="floor" d="M620,700 L620,1220 L350,1220 L350,700 Z"/>
+    <path id="bad" data-name="Bad" class="floor" d="M335,870 L335,1195 L190,1195 L190,870 Z"/>
+    <path id="door-kueche-threshold" class="floor" d="M545,535 L545,570 L450,570 L450,535 Z"/>
+    <path id="door-schlafzimmer-threshold" class="floor" d="M460,685 L460,700 L370,700 L370,685 Z"/>
+    <path id="door-front-threshold" class="floor" d="M165,775 L165,800 L75,800 L75,775 Z"/>
+    <path id="door-bad-threshold" class="floor" d="M275,855 L275,870 L190,870 L190,855 Z"/>
+  </g>
+  <g id="walls">
+    <path class="walls" fill-rule="evenodd" d="M40,545 L40,800 L75,800 L75,775 L65,775 L65,570 L450,570 L450,535 L350,535 L350,335 L420,335 L420,65 L620,65 L620,535 L545,535 L545,570 L620,570 L620,685 L460,685 L460,700 L620,700 L620,1220 L350,1220 L350,700 L370,700 L370,685 L290,685 L290,855 L275,855 L275,870 L335,870 L335,1195 L190,1195 L190,870 L190,855 L190,775 L165,775 L165,800 L165,845 L165,880 L165,1220 L325,1220 L325,1245 L645,1245 L645,710 L645,675 L645,560 L645,545 L645,40 L395,40 L395,310 L325,310 L325,545 Z"/>
+  </g>
+  <g id="doors">
+    <g id="door-kueche"><line x1="545" y1="535" x2="545" y2="440" class="leaf"/><path d="M450,535 A95,95 0 0 1 545,440" class="swing"/></g>
+    <g id="door-schlafzimmer"><line x1="370" y1="700" x2="370" y2="790" class="leaf"/><path d="M460,700 A90,90 0 0 1 370,790" class="swing"/></g>
+    <g id="door-front"><line x1="75" y1="775" x2="75" y2="685" class="leaf"/><path d="M165,775 A90,90 0 0 0 75,685" class="swing"/></g>
+    <g id="door-bad"><line x1="190" y1="855" x2="190" y2="770" class="leaf"/><path d="M275,855 A85,85 0 0 0 190,770" class="swing"/></g>
+  </g>
+  <g id="labels">
+    <text x="502.5" y="323.5" class="name">Küche</text>
+    <text x="220" y="646" class="name">Flur</text>
+    <text x="485" y="966" class="name">Schlafzimmer</text>
+    <text x="262.5" y="1038.5" class="name">Bad</text>
+  </g>
+</svg>

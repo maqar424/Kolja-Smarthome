@@ -1,0 +1,3672 @@
+{
+  "source": "Zigbee2MQTT 2.12.1 web-UI state export, trimmed. Live equivalent: MQTT topics zigbee2mqtt/bridge/devices and zigbee2mqtt/bridge/groups.",
+  "exported": "2026-11-06",
+  "devices": [
+    {
+      "friendly_name": "pveSwitch",
+      "ieee_address": "0x70b3d52b6005990d",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Tuya",
+      "model": "TS011F_plug_3",
+      "description": "Smart plug (with power monitoring by polling)",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of the switch",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            }
+          ],
+          "type": "switch"
+        },
+        {
+          "access": 7,
+          "description": "Toggle the device after a set duration (one time action)",
+          "label": "Countdown",
+          "name": "countdown",
+          "property": "countdown",
+          "type": "numeric",
+          "unit": "s",
+          "value_max": 43200,
+          "value_min": 0,
+          "value_step": 1
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Recover state after power outage",
+          "label": "Power outage memory",
+          "name": "power_outage_memory",
+          "property": "power_outage_memory",
+          "type": "enum",
+          "values": [
+            "on",
+            "off",
+            "restore"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "LED indicator mode",
+          "label": "Indicator mode",
+          "name": "indicator_mode",
+          "property": "indicator_mode",
+          "type": "enum",
+          "values": [
+            "off",
+            "off/on",
+            "on/off",
+            "on"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "Instantaneous measured power",
+          "label": "Power",
+          "name": "power",
+          "property": "power",
+          "type": "numeric",
+          "unit": "W"
+        },
+        {
+          "access": 1,
+          "description": "Instantaneous measured electrical current",
+          "label": "Current",
+          "name": "current",
+          "property": "current",
+          "type": "numeric",
+          "unit": "A"
+        },
+        {
+          "access": 1,
+          "description": "Measured electrical potential value",
+          "label": "Voltage",
+          "name": "voltage",
+          "property": "voltage",
+          "type": "numeric",
+          "unit": "V"
+        },
+        {
+          "access": 1,
+          "description": "Sum of consumed energy",
+          "label": "Energy",
+          "name": "energy",
+          "property": "energy",
+          "type": "numeric",
+          "unit": "kWh"
+        },
+        {
+          "access": 3,
+          "description": "Enables/disables physical input on the device",
+          "label": "Child lock",
+          "name": "child_lock",
+          "property": "child_lock",
+          "type": "binary",
+          "value_off": "UNLOCK",
+          "value_on": "LOCK"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzTowerbutton",
+      "ieee_address": "0x001788010b9ff001",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "8718699693985",
+      "description": "Hue smart button",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "on",
+            "off",
+            "press",
+            "hold",
+            "release"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzTowerlampe",
+      "ieee_address": "0x70b3d52b6007c5f7",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Tuya",
+      "model": "TS011F_plug_3",
+      "description": "Smart plug (with power monitoring by polling)",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of the switch",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            }
+          ],
+          "type": "switch"
+        },
+        {
+          "access": 7,
+          "description": "Toggle the device after a set duration (one time action)",
+          "label": "Countdown",
+          "name": "countdown",
+          "property": "countdown",
+          "type": "numeric",
+          "unit": "s",
+          "value_max": 43200,
+          "value_min": 0,
+          "value_step": 1
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Recover state after power outage",
+          "label": "Power outage memory",
+          "name": "power_outage_memory",
+          "property": "power_outage_memory",
+          "type": "enum",
+          "values": [
+            "on",
+            "off",
+            "restore"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "LED indicator mode",
+          "label": "Indicator mode",
+          "name": "indicator_mode",
+          "property": "indicator_mode",
+          "type": "enum",
+          "values": [
+            "off",
+            "off/on",
+            "on/off",
+            "on"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "Instantaneous measured power",
+          "label": "Power",
+          "name": "power",
+          "property": "power",
+          "type": "numeric",
+          "unit": "W"
+        },
+        {
+          "access": 1,
+          "description": "Instantaneous measured electrical current",
+          "label": "Current",
+          "name": "current",
+          "property": "current",
+          "type": "numeric",
+          "unit": "A"
+        },
+        {
+          "access": 1,
+          "description": "Measured electrical potential value",
+          "label": "Voltage",
+          "name": "voltage",
+          "property": "voltage",
+          "type": "numeric",
+          "unit": "V"
+        },
+        {
+          "access": 1,
+          "description": "Sum of consumed energy",
+          "label": "Energy",
+          "name": "energy",
+          "property": "energy",
+          "type": "numeric",
+          "unit": "kWh"
+        },
+        {
+          "access": 3,
+          "description": "Enables/disables physical input on the device",
+          "label": "Child lock",
+          "name": "child_lock",
+          "property": "child_lock",
+          "type": "binary",
+          "value_off": "UNLOCK",
+          "value_on": "LOCK"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "kuecheWasserkocher",
+      "ieee_address": "0x70b3d52b60059152",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Tuya",
+      "model": "TS011F_plug_3",
+      "description": "Smart plug (with power monitoring by polling)",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of the switch",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            }
+          ],
+          "type": "switch"
+        },
+        {
+          "access": 7,
+          "description": "Toggle the device after a set duration (one time action)",
+          "label": "Countdown",
+          "name": "countdown",
+          "property": "countdown",
+          "type": "numeric",
+          "unit": "s",
+          "value_max": 43200,
+          "value_min": 0,
+          "value_step": 1
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Recover state after power outage",
+          "label": "Power outage memory",
+          "name": "power_outage_memory",
+          "property": "power_outage_memory",
+          "type": "enum",
+          "values": [
+            "on",
+            "off",
+            "restore"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "LED indicator mode",
+          "label": "Indicator mode",
+          "name": "indicator_mode",
+          "property": "indicator_mode",
+          "type": "enum",
+          "values": [
+            "off",
+            "off/on",
+            "on/off",
+            "on"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "Instantaneous measured power",
+          "label": "Power",
+          "name": "power",
+          "property": "power",
+          "type": "numeric",
+          "unit": "W"
+        },
+        {
+          "access": 1,
+          "description": "Instantaneous measured electrical current",
+          "label": "Current",
+          "name": "current",
+          "property": "current",
+          "type": "numeric",
+          "unit": "A"
+        },
+        {
+          "access": 1,
+          "description": "Measured electrical potential value",
+          "label": "Voltage",
+          "name": "voltage",
+          "property": "voltage",
+          "type": "numeric",
+          "unit": "V"
+        },
+        {
+          "access": 1,
+          "description": "Sum of consumed energy",
+          "label": "Energy",
+          "name": "energy",
+          "property": "energy",
+          "type": "numeric",
+          "unit": "kWh"
+        },
+        {
+          "access": 3,
+          "description": "Enables/disables physical input on the device",
+          "label": "Child lock",
+          "name": "child_lock",
+          "property": "child_lock",
+          "type": "binary",
+          "value_off": "UNLOCK",
+          "value_on": "LOCK"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "kuecheButton",
+      "ieee_address": "0x001788010ba0bb99",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "8718699693985",
+      "description": "Hue smart button",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "on",
+            "off",
+            "press",
+            "hold",
+            "release"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzPcfingerbot",
+      "ieee_address": "0xa4c1381eb59722c1",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Tuya",
+      "model": "TS0001_fingerbot",
+      "description": "Zigbee fingerbot plus",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of the switch",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            }
+          ],
+          "type": "switch"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 3,
+          "description": "Working mode",
+          "label": "Mode",
+          "name": "mode",
+          "property": "mode",
+          "type": "enum",
+          "values": [
+            "click",
+            "switch",
+            "program"
+          ]
+        },
+        {
+          "access": 3,
+          "description": "Down movement limit",
+          "label": "Lower",
+          "name": "lower",
+          "property": "lower",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 50,
+          "value_step": 1
+        },
+        {
+          "access": 3,
+          "description": "Up movement limit",
+          "label": "Upper",
+          "name": "upper",
+          "property": "upper",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 50,
+          "value_min": 0,
+          "value_step": 1
+        },
+        {
+          "access": 3,
+          "description": "Sustain time",
+          "label": "Delay",
+          "name": "delay",
+          "property": "delay",
+          "type": "numeric",
+          "unit": "s",
+          "value_max": 10,
+          "value_min": 0,
+          "value_step": 1
+        },
+        {
+          "access": 3,
+          "description": "Reverse",
+          "label": "Reverse",
+          "name": "reverse",
+          "property": "reverse",
+          "type": "binary",
+          "value_off": "OFF",
+          "value_on": "ON"
+        },
+        {
+          "access": 3,
+          "description": "Touch control",
+          "label": "Touch",
+          "name": "touch",
+          "property": "touch",
+          "type": "binary",
+          "value_off": "OFF",
+          "value_on": "ON"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "badDeckenlampe",
+      "ieee_address": "0x001788010e19bc7f",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Philips",
+      "model": "915005996401",
+      "description": "Hue white ambiance ceiling light Enrave S with Bluetooth",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 454
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 454,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 454
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 454,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 3,
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "candle",
+            "sunset",
+            "sunrise",
+            "sparkle",
+            "opal",
+            "glisten",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "none",
+            "finish_effect",
+            "stop_effect",
+            "stop_hue_effect"
+          ]
+        },
+        {
+          "access": 3,
+          "description": "Animation speed for the active effect (0=slowest, 1=fastest)",
+          "label": "Effect speed",
+          "name": "effect_speed",
+          "property": "effect_speed",
+          "type": "numeric",
+          "value_max": 1,
+          "value_min": 0,
+          "value_step": 0.01
+        },
+        {
+          "access": 2,
+          "description": "Set the base color of the active effect without stopping it (hex e.g. #FF4400, or JSON {\"x\":0.6,\"y\":0.3})",
+          "label": "Effect color",
+          "name": "effect_color",
+          "property": "effect_color",
+          "type": "text"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "flurDeckenlampe",
+      "ieee_address": "0x001788010d2442e0",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Philips",
+      "model": "3216131P6",
+      "description": "Hue white ambiance Aurelle square panel light",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 454
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 454,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 454
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 454,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 3,
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "candle",
+            "sunset",
+            "sunrise",
+            "sparkle",
+            "opal",
+            "glisten",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "none",
+            "finish_effect",
+            "stop_effect",
+            "stop_hue_effect"
+          ]
+        },
+        {
+          "access": 3,
+          "description": "Animation speed for the active effect (0=slowest, 1=fastest)",
+          "label": "Effect speed",
+          "name": "effect_speed",
+          "property": "effect_speed",
+          "type": "numeric",
+          "value_max": 1,
+          "value_min": 0,
+          "value_step": 0.01
+        },
+        {
+          "access": 2,
+          "description": "Set the base color of the active effect without stopping it (hex e.g. #FF4400, or JSON {\"x\":0.6,\"y\":0.3})",
+          "label": "Effect color",
+          "name": "effect_color",
+          "property": "effect_color",
+          "type": "text"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "kuecheDeckenlampe",
+      "ieee_address": "0x001788010e3405f7",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Philips",
+      "model": "929003099101",
+      "description": "Hue white ambiance Aurelle rectangle panel light",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 454
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 454,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 454
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 454,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 3,
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "candle",
+            "sunset",
+            "sunrise",
+            "sparkle",
+            "opal",
+            "glisten",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "none",
+            "finish_effect",
+            "stop_effect",
+            "stop_hue_effect"
+          ]
+        },
+        {
+          "access": 3,
+          "description": "Animation speed for the active effect (0=slowest, 1=fastest)",
+          "label": "Effect speed",
+          "name": "effect_speed",
+          "property": "effect_speed",
+          "type": "numeric",
+          "value_max": 1,
+          "value_min": 0,
+          "value_step": 0.01
+        },
+        {
+          "access": 2,
+          "description": "Set the base color of the active effect without stopping it (hex e.g. #FF4400, or JSON {\"x\":0.6,\"y\":0.3})",
+          "label": "Effect color",
+          "name": "effect_color",
+          "property": "effect_color",
+          "type": "text"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzDeckenlampe",
+      "ieee_address": "0x001788010e1547ac",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Philips",
+      "model": "929003099001",
+      "description": "Hue white ambiance Aurelle square panel light",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 454
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 454,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 454
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 454,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 3,
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "candle",
+            "sunset",
+            "sunrise",
+            "sparkle",
+            "opal",
+            "glisten",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "none",
+            "finish_effect",
+            "stop_effect",
+            "stop_hue_effect"
+          ]
+        },
+        {
+          "access": 3,
+          "description": "Animation speed for the active effect (0=slowest, 1=fastest)",
+          "label": "Effect speed",
+          "name": "effect_speed",
+          "property": "effect_speed",
+          "type": "numeric",
+          "value_max": 1,
+          "value_min": 0,
+          "value_step": 0.01
+        },
+        {
+          "access": 2,
+          "description": "Set the base color of the active effect without stopping it (hex e.g. #FF4400, or JSON {\"x\":0.6,\"y\":0.3})",
+          "label": "Effect color",
+          "name": "effect_color",
+          "property": "effect_color",
+          "type": "text"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzSchreibtischlampe",
+      "ieee_address": "0x00158d00079a91ef",
+      "type": "Router",
+      "power_source": "DC Source",
+      "vendor": "Paulmann",
+      "model": "500.46",
+      "description": "SmartHome Zigbee MaxLED tunable white controller max. 144W / 24V DC",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 2,
+          "description": "Triggers an effect on the light (e.g. make light blink for a few seconds)",
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "finish_effect",
+            "stop_effect"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "badSpiegellampe",
+      "ieee_address": "0x00158d0008776b2f",
+      "type": "Router",
+      "power_source": "DC Source",
+      "vendor": "Paulmann",
+      "model": "500.46",
+      "description": "SmartHome Zigbee MaxLED tunable white controller max. 144W / 24V DC",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 2,
+          "description": "Triggers an effect on the light (e.g. make light blink for a few seconds)",
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "finish_effect",
+            "stop_effect"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "flurDeckenstrip",
+      "ieee_address": "0x00158d00091fc8a7",
+      "type": "Router",
+      "power_source": "DC Source",
+      "vendor": "Paulmann",
+      "model": "500.46",
+      "description": "SmartHome Zigbee MaxLED tunable white controller max. 144W / 24V DC",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 2,
+          "description": "Triggers an effect on the light (e.g. make light blink for a few seconds)",
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "finish_effect",
+            "stop_effect"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "kuecheTwintowers",
+      "ieee_address": "0x00158d00087ac463",
+      "type": "Router",
+      "power_source": "DC Source",
+      "vendor": "Paulmann",
+      "model": "500.46",
+      "description": "SmartHome Zigbee MaxLED tunable white controller max. 144W / 24V DC",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 2,
+          "description": "Triggers an effect on the light (e.g. make light blink for a few seconds)",
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "finish_effect",
+            "stop_effect"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "kuecheKuechenzeile",
+      "ieee_address": "0x00158d00091fc8b5",
+      "type": "Router",
+      "power_source": "DC Source",
+      "vendor": "Paulmann",
+      "model": "500.46",
+      "description": "SmartHome Zigbee MaxLED tunable white controller max. 144W / 24V DC",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 2,
+          "description": "Triggers an effect on the light (e.g. make light blink for a few seconds)",
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "finish_effect",
+            "stop_effect"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzBettlampe",
+      "ieee_address": "0x00158d0008b4a30a",
+      "type": "Router",
+      "power_source": "DC Source",
+      "vendor": "Paulmann",
+      "model": "500.46",
+      "description": "SmartHome Zigbee MaxLED tunable white controller max. 144W / 24V DC",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 2,
+          "description": "Triggers an effect on the light (e.g. make light blink for a few seconds)",
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "finish_effect",
+            "stop_effect"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzBodenstrips",
+      "ieee_address": "0x00158d0008b4a3c8",
+      "type": "Router",
+      "power_source": "DC Source",
+      "vendor": "Paulmann",
+      "model": "500.46",
+      "description": "SmartHome Zigbee MaxLED tunable white controller max. 144W / 24V DC",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 370
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 370,
+              "value_min": 153
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 2,
+          "description": "Triggers an effect on the light (e.g. make light blink for a few seconds)",
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "finish_effect",
+            "stop_effect"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzLavalampe",
+      "ieee_address": "0x70b3d52b60059f1f",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Tuya",
+      "model": "TS011F_plug_3",
+      "description": "Smart plug (with power monitoring by polling)",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of the switch",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            }
+          ],
+          "type": "switch"
+        },
+        {
+          "access": 7,
+          "description": "Toggle the device after a set duration (one time action)",
+          "label": "Countdown",
+          "name": "countdown",
+          "property": "countdown",
+          "type": "numeric",
+          "unit": "s",
+          "value_max": 43200,
+          "value_min": 0,
+          "value_step": 1
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Recover state after power outage",
+          "label": "Power outage memory",
+          "name": "power_outage_memory",
+          "property": "power_outage_memory",
+          "type": "enum",
+          "values": [
+            "on",
+            "off",
+            "restore"
+          ]
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "LED indicator mode",
+          "label": "Indicator mode",
+          "name": "indicator_mode",
+          "property": "indicator_mode",
+          "type": "enum",
+          "values": [
+            "off",
+            "off/on",
+            "on/off",
+            "on"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "Instantaneous measured power",
+          "label": "Power",
+          "name": "power",
+          "property": "power",
+          "type": "numeric",
+          "unit": "W"
+        },
+        {
+          "access": 1,
+          "description": "Instantaneous measured electrical current",
+          "label": "Current",
+          "name": "current",
+          "property": "current",
+          "type": "numeric",
+          "unit": "A"
+        },
+        {
+          "access": 1,
+          "description": "Measured electrical potential value",
+          "label": "Voltage",
+          "name": "voltage",
+          "property": "voltage",
+          "type": "numeric",
+          "unit": "V"
+        },
+        {
+          "access": 1,
+          "description": "Sum of consumed energy",
+          "label": "Energy",
+          "name": "energy",
+          "property": "energy",
+          "type": "numeric",
+          "unit": "kWh"
+        },
+        {
+          "access": 3,
+          "description": "Enables/disables physical input on the device",
+          "label": "Child lock",
+          "name": "child_lock",
+          "property": "child_lock",
+          "type": "binary",
+          "value_off": "UNLOCK",
+          "value_on": "LOCK"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "kuecheTischlampe",
+      "ieee_address": "0x001788010cba059c",
+      "type": "Router",
+      "power_source": "Mains (single phase)",
+      "vendor": "Philips",
+      "model": "929003128501",
+      "description": "Hue Go portable table lamp black",
+      "exposes": [
+        {
+          "features": [
+            {
+              "access": 7,
+              "description": "On/off state of this light",
+              "label": "State",
+              "name": "state",
+              "property": "state",
+              "type": "binary",
+              "value_off": "OFF",
+              "value_on": "ON",
+              "value_toggle": "TOGGLE"
+            },
+            {
+              "access": 7,
+              "description": "Brightness of this light",
+              "label": "Brightness",
+              "name": "brightness",
+              "property": "brightness",
+              "type": "numeric",
+              "value_max": 254,
+              "value_min": 0
+            },
+            {
+              "access": 7,
+              "description": "Color temperature of this light",
+              "label": "Color temp",
+              "name": "color_temp",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 500
+                }
+              ],
+              "property": "color_temp",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 500,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color temperature after cold power on of this light",
+              "label": "Color temp startup",
+              "name": "color_temp_startup",
+              "presets": [
+                {
+                  "description": "Coolest temperature supported",
+                  "name": "coolest",
+                  "value": 153
+                },
+                {
+                  "description": "Cool temperature (250 mireds / 4000 Kelvin)",
+                  "name": "cool",
+                  "value": 250
+                },
+                {
+                  "description": "Neutral temperature (370 mireds / 2700 Kelvin)",
+                  "name": "neutral",
+                  "value": 370
+                },
+                {
+                  "description": "Warm temperature (454 mireds / 2200 Kelvin)",
+                  "name": "warm",
+                  "value": 454
+                },
+                {
+                  "description": "Warmest temperature supported",
+                  "name": "warmest",
+                  "value": 500
+                },
+                {
+                  "description": "Restore previous color_temp on cold power on",
+                  "name": "previous",
+                  "value": 65535
+                }
+              ],
+              "property": "color_temp_startup",
+              "type": "numeric",
+              "unit": "mired",
+              "value_max": 500,
+              "value_min": 153
+            },
+            {
+              "access": 7,
+              "description": "Color of this light in the CIE 1931 color space (x/y)",
+              "features": [
+                {
+                  "access": 7,
+                  "label": "X",
+                  "name": "x",
+                  "property": "x",
+                  "type": "numeric"
+                },
+                {
+                  "access": 7,
+                  "label": "Y",
+                  "name": "y",
+                  "property": "y",
+                  "type": "numeric"
+                }
+              ],
+              "label": "Color (X/Y)",
+              "name": "color_xy",
+              "property": "color",
+              "type": "composite"
+            },
+            {
+              "access": 7,
+              "description": "Color of this light expressed as hue/saturation",
+              "features": [
+                {
+                  "access": 7,
+                  "label": "Hue",
+                  "name": "hue",
+                  "property": "hue",
+                  "type": "numeric"
+                },
+                {
+                  "access": 7,
+                  "label": "Saturation",
+                  "name": "saturation",
+                  "property": "saturation",
+                  "type": "numeric"
+                }
+              ],
+              "label": "Color (HS)",
+              "name": "color_hs",
+              "property": "color",
+              "type": "composite"
+            }
+          ],
+          "type": "light"
+        },
+        {
+          "access": 7,
+          "category": "config",
+          "description": "Controls the behavior when the device is powered on after power loss",
+          "label": "Power-on behavior",
+          "name": "power_on_behavior",
+          "property": "power_on_behavior",
+          "type": "enum",
+          "values": [
+            "off",
+            "on",
+            "toggle",
+            "previous"
+          ]
+        },
+        {
+          "access": 3,
+          "label": "Effect",
+          "name": "effect",
+          "property": "effect",
+          "type": "enum",
+          "values": [
+            "blink",
+            "breathe",
+            "okay",
+            "channel_change",
+            "candle",
+            "fireplace",
+            "colorloop",
+            "sunset",
+            "sunrise",
+            "sparkle",
+            "opal",
+            "glisten",
+            "underwater",
+            "cosmos",
+            "sunbeam",
+            "enchant",
+            "none",
+            "finish_effect",
+            "stop_effect",
+            "stop_hue_effect"
+          ]
+        },
+        {
+          "access": 3,
+          "description": "Animation speed for the active effect (0=slowest, 1=fastest)",
+          "label": "Effect speed",
+          "name": "effect_speed",
+          "property": "effect_speed",
+          "type": "numeric",
+          "value_max": 1,
+          "value_min": 0,
+          "value_step": 0.01
+        },
+        {
+          "access": 2,
+          "description": "Set the base color of the active effect without stopping it (hex e.g. #FF4400, or JSON {\"x\":0.6,\"y\":0.3})",
+          "label": "Effect color",
+          "name": "effect_color",
+          "property": "effect_color",
+          "type": "text"
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzLichtschalter",
+      "ieee_address": "0x001788010e28e092",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "929002398602",
+      "description": "Hue dimmer switch gen 2",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "on_press",
+            "on_hold",
+            "on_press_release",
+            "on_hold_release",
+            "off_press",
+            "off_hold",
+            "off_press_release",
+            "off_hold_release",
+            "up_press",
+            "up_hold",
+            "up_press_release",
+            "up_hold_release",
+            "down_press",
+            "down_hold",
+            "down_press_release",
+            "down_hold_release",
+            "recall_0",
+            "recall_1"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "badLichtschalter",
+      "ieee_address": "0x001788010c26a9e9",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "929002398602",
+      "description": "Hue dimmer switch gen 2",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "on_press",
+            "on_hold",
+            "on_press_release",
+            "on_hold_release",
+            "off_press",
+            "off_hold",
+            "off_press_release",
+            "off_hold_release",
+            "up_press",
+            "up_hold",
+            "up_press_release",
+            "up_hold_release",
+            "down_press",
+            "down_hold",
+            "down_press_release",
+            "down_hold_release",
+            "recall_0",
+            "recall_1"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "flurLichtschalter",
+      "ieee_address": "0x001788010e2b6575",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "929002398602",
+      "description": "Hue dimmer switch gen 2",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "on_press",
+            "on_hold",
+            "on_press_release",
+            "on_hold_release",
+            "off_press",
+            "off_hold",
+            "off_press_release",
+            "off_hold_release",
+            "up_press",
+            "up_hold",
+            "up_press_release",
+            "up_hold_release",
+            "down_press",
+            "down_hold",
+            "down_press_release",
+            "down_hold_release",
+            "recall_0",
+            "recall_1"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "kuecheLichtschalter",
+      "ieee_address": "0x001788010b78f82a",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "929002398602",
+      "description": "Hue dimmer switch gen 2",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "on_press",
+            "on_hold",
+            "on_press_release",
+            "on_hold_release",
+            "off_press",
+            "off_hold",
+            "off_press_release",
+            "off_hold_release",
+            "up_press",
+            "up_hold",
+            "up_press_release",
+            "up_hold_release",
+            "down_press",
+            "down_hold",
+            "down_press_release",
+            "down_hold_release",
+            "recall_0",
+            "recall_1"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzSchreibtischdialswitch",
+      "ieee_address": "0x001788010e55141e",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "8719514440937/8719514440999",
+      "description": "Hue Tap dial switch",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "Direction in which the dial was turned",
+          "label": "Action direction",
+          "name": "action_direction",
+          "property": "action_direction",
+          "type": "enum",
+          "values": [
+            "right",
+            "left"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "Type of the rotation, value in the first message is `step` and in the next messages value is `rotate`",
+          "label": "Action type",
+          "name": "action_type",
+          "property": "action_type",
+          "type": "enum",
+          "values": [
+            "step",
+            "rotate"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "value in seconds representing the amount of time the last action took",
+          "label": "Action time",
+          "name": "action_time",
+          "property": "action_time",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "Raw rotation state value of the dial which represents brightness from 0-255",
+          "label": "Brightness",
+          "name": "brightness",
+          "property": "brightness",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "amount of steps the last action took on the dial exposed as a posive value from 0-255",
+          "label": "Action step size",
+          "name": "action_step_size",
+          "property": "action_step_size",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "button_1_press",
+            "button_1_press_release",
+            "button_1_hold",
+            "button_1_hold_release",
+            "button_2_press",
+            "button_2_press_release",
+            "button_2_hold",
+            "button_2_hold_release",
+            "button_3_press",
+            "button_3_press_release",
+            "button_3_hold",
+            "button_3_hold_release",
+            "button_4_press",
+            "button_4_press_release",
+            "button_4_hold",
+            "button_4_hold_release",
+            "dial_rotate_left_step",
+            "dial_rotate_left_slow",
+            "dial_rotate_left_fast",
+            "dial_rotate_right_step",
+            "dial_rotate_right_slow",
+            "dial_rotate_right_fast",
+            "brightness_step_up",
+            "brightness_step_down"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "wzBettdialswitch",
+      "ieee_address": "0x001788010e55067c",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "8719514440937/8719514440999",
+      "description": "Hue Tap dial switch",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "Direction in which the dial was turned",
+          "label": "Action direction",
+          "name": "action_direction",
+          "property": "action_direction",
+          "type": "enum",
+          "values": [
+            "right",
+            "left"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "Type of the rotation, value in the first message is `step` and in the next messages value is `rotate`",
+          "label": "Action type",
+          "name": "action_type",
+          "property": "action_type",
+          "type": "enum",
+          "values": [
+            "step",
+            "rotate"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "value in seconds representing the amount of time the last action took",
+          "label": "Action time",
+          "name": "action_time",
+          "property": "action_time",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "Raw rotation state value of the dial which represents brightness from 0-255",
+          "label": "Brightness",
+          "name": "brightness",
+          "property": "brightness",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "amount of steps the last action took on the dial exposed as a posive value from 0-255",
+          "label": "Action step size",
+          "name": "action_step_size",
+          "property": "action_step_size",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "button_1_press",
+            "button_1_press_release",
+            "button_1_hold",
+            "button_1_hold_release",
+            "button_2_press",
+            "button_2_press_release",
+            "button_2_hold",
+            "button_2_hold_release",
+            "button_3_press",
+            "button_3_press_release",
+            "button_3_hold",
+            "button_3_hold_release",
+            "button_4_press",
+            "button_4_press_release",
+            "button_4_hold",
+            "button_4_hold_release",
+            "dial_rotate_left_step",
+            "dial_rotate_left_slow",
+            "dial_rotate_left_fast",
+            "dial_rotate_right_step",
+            "dial_rotate_right_slow",
+            "dial_rotate_right_fast",
+            "brightness_step_up",
+            "brightness_step_down"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    },
+    {
+      "friendly_name": "kuecheDialswitch",
+      "ieee_address": "0x001788010e550706",
+      "type": "EndDevice",
+      "power_source": "Battery",
+      "vendor": "Philips",
+      "model": "8719514440937/8719514440999",
+      "description": "Hue Tap dial switch",
+      "exposes": [
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Remaining battery in %, can take up to 24 hours before reported",
+          "label": "Battery",
+          "name": "battery",
+          "property": "battery",
+          "type": "numeric",
+          "unit": "%",
+          "value_max": 100,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "Direction in which the dial was turned",
+          "label": "Action direction",
+          "name": "action_direction",
+          "property": "action_direction",
+          "type": "enum",
+          "values": [
+            "right",
+            "left"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "Type of the rotation, value in the first message is `step` and in the next messages value is `rotate`",
+          "label": "Action type",
+          "name": "action_type",
+          "property": "action_type",
+          "type": "enum",
+          "values": [
+            "step",
+            "rotate"
+          ]
+        },
+        {
+          "access": 1,
+          "description": "value in seconds representing the amount of time the last action took",
+          "label": "Action time",
+          "name": "action_time",
+          "property": "action_time",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "Raw rotation state value of the dial which represents brightness from 0-255",
+          "label": "Brightness",
+          "name": "brightness",
+          "property": "brightness",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "description": "amount of steps the last action took on the dial exposed as a posive value from 0-255",
+          "label": "Action step size",
+          "name": "action_step_size",
+          "property": "action_step_size",
+          "type": "numeric",
+          "value_max": 255,
+          "value_min": 0
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Triggered action (e.g. a button click)",
+          "label": "Action",
+          "name": "action",
+          "property": "action",
+          "type": "enum",
+          "values": [
+            "button_1_press",
+            "button_1_press_release",
+            "button_1_hold",
+            "button_1_hold_release",
+            "button_2_press",
+            "button_2_press_release",
+            "button_2_hold",
+            "button_2_hold_release",
+            "button_3_press",
+            "button_3_press_release",
+            "button_3_hold",
+            "button_3_hold_release",
+            "button_4_press",
+            "button_4_press_release",
+            "button_4_hold",
+            "button_4_hold_release",
+            "dial_rotate_left_step",
+            "dial_rotate_left_slow",
+            "dial_rotate_left_fast",
+            "dial_rotate_right_step",
+            "dial_rotate_right_slow",
+            "dial_rotate_right_fast",
+            "brightness_step_up",
+            "brightness_step_down"
+          ]
+        },
+        {
+          "access": 1,
+          "category": "diagnostic",
+          "description": "Link quality (signal strength)",
+          "label": "Linkquality",
+          "name": "linkquality",
+          "property": "linkquality",
+          "type": "numeric",
+          "unit": "lqi",
+          "value_max": 255,
+          "value_min": 0
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "friendly_name": "Flur",
+      "members": [
+        {
+          "friendly_name": "flurDeckenlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "flurDeckenstrip",
+          "endpoint": 1
+        }
+      ],
+      "scenes": [
+        {
+          "id": 0,
+          "name": "flur_off"
+        },
+        {
+          "id": 1,
+          "name": "flur_kalt"
+        },
+        {
+          "id": 2,
+          "name": "flur_warm"
+        },
+        {
+          "id": 3,
+          "name": "flur_night"
+        },
+        {
+          "id": 4,
+          "name": "flur_twilight"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "friendly_name": "Bad",
+      "members": [
+        {
+          "friendly_name": "badDeckenlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "badSpiegellampe",
+          "endpoint": 1
+        }
+      ],
+      "scenes": [
+        {
+          "id": 0,
+          "name": "bad_off"
+        },
+        {
+          "id": 1,
+          "name": "bad_kalt"
+        },
+        {
+          "id": 2,
+          "name": "bad_warm"
+        },
+        {
+          "id": 3,
+          "name": "bad_night"
+        },
+        {
+          "id": 4,
+          "name": "bad_twilight"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "friendly_name": "Küche",
+      "members": [
+        {
+          "friendly_name": "kuecheDeckenlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "kuecheKuechenzeile",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "kuecheTwintowers",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "kuecheTischlampe",
+          "endpoint": 11
+        }
+      ],
+      "scenes": [
+        {
+          "id": 0,
+          "name": "kueche_off"
+        },
+        {
+          "id": 1,
+          "name": "kueche_kalt"
+        },
+        {
+          "id": 2,
+          "name": "kueche_warm"
+        },
+        {
+          "id": 3,
+          "name": "kueche_night"
+        },
+        {
+          "id": 4,
+          "name": "kueche_twilight"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "friendly_name": "Wohnzimmer",
+      "members": [
+        {
+          "friendly_name": "wzBettlampe",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzBodenstrips",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzDeckenlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "wzSchreibtischlampe",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzTowerlampe",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzLavalampe",
+          "endpoint": 1
+        }
+      ],
+      "scenes": [
+        {
+          "id": 0,
+          "name": "wz_off"
+        },
+        {
+          "id": 1,
+          "name": "wz_kalt"
+        },
+        {
+          "id": 2,
+          "name": "wz_warm"
+        },
+        {
+          "id": 3,
+          "name": "wz_night"
+        },
+        {
+          "id": 4,
+          "name": "wz_twilight"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "friendly_name": "Alle_Lampen",
+      "members": [
+        {
+          "friendly_name": "badDeckenlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "badSpiegellampe",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "flurDeckenlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "flurDeckenstrip",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "kuecheDeckenlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "kuecheKuechenzeile",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "kuecheTischlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "kuecheTwintowers",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzBettlampe",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzBodenstrips",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzDeckenlampe",
+          "endpoint": 11
+        },
+        {
+          "friendly_name": "wzSchreibtischlampe",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzTowerlampe",
+          "endpoint": 1
+        }
+      ],
+      "scenes": [
+        {
+          "id": 0,
+          "name": "alle_off"
+        },
+        {
+          "id": 1,
+          "name": "alle_kalt"
+        },
+        {
+          "id": 2,
+          "name": "alle_warm"
+        },
+        {
+          "id": 3,
+          "name": "alle_night"
+        },
+        {
+          "id": 4,
+          "name": "alle_twilight"
+        }
+      ]
+    }
+  ]
+}

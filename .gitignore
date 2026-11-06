@@ -1,0 +1,35 @@
+# Secrets and local config
+.env
+*.env.local
+
+# Zigbee2MQTT backups and raw exports (contain network key / network parameters)
+*.zip
+z2m-backup*
+*state*.json
+!docs/z2m-snapshot.json
+
+# Excel lock files while the sheet is open
+~$*
+
+# Runtime data
+*.db
+*.sqlite
+data/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node / frontend builds
+node_modules/
+dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
