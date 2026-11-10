@@ -128,7 +128,7 @@ An animated sunrise in the Schlafzimmer that ends at a set wake-up time, followe
 |---|---|
 | Wake-up time | The time the animation **ends** |
 | Duration | How long the animation runs; it starts this long before the wake-up time (default 30 min) |
-| Toggle **"Sonnenaufgang morgen"** | Arms the **next** occurrence of the wake-up time. One-shot: switches itself off after that wake-up has run or was cancelled. Time and duration are kept. |
+| Toggle **"Sonnenaufgang"** | On = the sunrise runs **every day** at the wake-up time until the toggle is turned off. Off = it never runs. The toggle only changes when Kolja changes it. |
 
 ### Normal animation
 
@@ -152,19 +152,22 @@ If the wake-up time is earlier than the start of phase `kalt`, the day starts at
 
 ### Fallback: Schlafzimmer already lit
 
-If **any** Schlafzimmer lamp is on when the animation would start, there is no animation. Instead, at the wake-up time `wzDeckenlampe` is set to 100 % brightness and coldest colour. The command is **always sent**, even if the lamp is already on in that state.
+If **any** Schlafzimmer lamp is on when the animation would start, there is no animation. Instead, at the wake-up time:
+
+1. `wzDeckenlampe` is set to 100 % brightness and coldest colour. The command is **always sent**, even if the lamp is already on in that state.
+2. Scene `kalt` is applied in every room (= `alle_kalt`), exactly as at the end of the normal animation. `wzDeckenlampe` stays at 100 % even if the kalt scene defines a lower value.
 
 ### No interference
 
 - **No wall switch, dial or button can change or stop a running sunrise.** During the animation, presses on `wzLichtschalter` are ignored; "all on"/"all off" from the Flur switch leave the three animated lamps alone. Other rooms work normally.
-- The app shows the three lamps as "Sonnenaufgang läuft" and offers exactly one action: **cancel**. Cancelling stops the animation and the final `alle_kalt`; lamps stay as they are.
+- The app shows the three lamps as "Sonnenaufgang läuft" and offers exactly one action: **cancel**. Cancelling stops today's animation and the final `alle_kalt`; lamps stay as they are. The toggle stays on, so it runs again the next day.
 
 ### Reliability
 
 - Armed state, wake-up time and duration are persisted. If the app restarts during the animation, it resumes at the correct point. If it restarts after the wake-up time but within the animation's duration, it still applies the final state.
 - Critical commands (start, final `alle_kalt`, fallback ceiling lamp) are **verified** against the state Z2M reports and resent individually if a lamp did not follow.
-- Every run is logged; the app shows the result of the last run (e.g. "Sonnenaufgang 06:30 ausgeführt" or what went wrong).
-- **Test mode:** a button in settings plays the full sequence compressed to about 1 minute, so the setup can be checked at any time.
+- Every run is logged. The app shows **nothing when a run succeeded**; only if something went wrong (e.g. a lamp did not respond, Z2M was offline, clock not synchronised) it shows a clear warning until it is dismissed.
+- **"Test" button** in settings: plays the full sequence (animation and final `alle_kalt`) compressed to about 1 minute.
 - Depends on correct time on the Pi (no hardware clock): the health check reports whether the system clock is NTP-synchronised.
 
 ## 8. App UI (PWA)
@@ -173,7 +176,7 @@ Three tabs:
 
 | Left: Plugs | Middle: Floor plan (start screen) | Right: Settings |
 |---|---|---|
-| Non-lamp plugs (`pveSwitch`, `kuecheWasserkocher`): live power, read-only, no switching *(default)*. Tap → pop-up chart of power history | `apartment-floorplan.svg` with lamp markers at `pos_x_cm`/`pos_y_cm`, showing on/off and brightness. Tap lamp → on/off, brightness. Tap room → room on/off, dim, scene. Master colour slider and "Alles aus" | Phase times, sun toggle, colour ramp durations, location, back-to-automatic, sunrise wake-up (time, duration, "Sonnenaufgang morgen", test, last run) |
+| Non-lamp plugs (`pveSwitch`, `kuecheWasserkocher`): live power, read-only, no switching *(default)*. Tap → pop-up chart of power history | `apartment-floorplan.svg` with lamp markers at `pos_x_cm`/`pos_y_cm`, showing on/off and brightness. Tap lamp → on/off, brightness. Tap room → room on/off, dim, scene. Master colour slider and "Alles aus" | Phase times, sun toggle, colour ramp durations, location, back-to-automatic, sunrise wake-up (toggle "Sonnenaufgang", time, duration, "Test") |
 
 - Optimised for phone portrait; works on desktop too.
 - Live state updates (lamps switched by wall switches appear immediately).
@@ -227,5 +230,4 @@ Hue tap dial switches, Hue smart buttons (incl. kettle button and kettle timer),
 - [ ] UI language (German assumed)
 - [ ] Pi IP address, fixed via DHCP reservation?
 - [ ] Verified: VM reaches the broker on port 1883
-- [ ] Sunrise fallback: does the final `alle_kalt` also run after the fallback?
 - [ ] `CLAUDE.md`
