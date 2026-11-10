@@ -37,6 +37,17 @@ The new app is **its own container**. It only speaks MQTT; it never touches Zigb
 
 Live truth for capabilities and state is Zigbee2MQTT over MQTT (`zigbee2mqtt/bridge/devices`, `zigbee2mqtt/bridge/groups`, `zigbee2mqtt/<name>`). The CSVs add what Z2M does not know (room, display name, flags, positions, scene brightness).
 
+### Lamp positions (sheet *Devices*)
+
+Coordinates in cm on `apartment-floorplan.svg` (1 SVG unit = 1 cm, origin top-left, plan 685 × 1285).
+
+| Column | Meaning |
+|---|---|
+| `shape` | `point` = `"x,y"` · `line` = `"x1,y1 x2,y2 …"` (polyline) · `rect` = `"x,y,w,h"` (top-left + size as drawn) |
+| `geometry_cm` | Coordinates in the format above. Several parts separated by `;` (e.g. `wzBodenstrips` = two strips, `kuecheTwintowers` = two towers) |
+| `mount` | `floor`, `middle` (between floor and ceiling), `ceiling`, or `vertical` (standing light column) |
+| `height_cm` | Only for `vertical`: span, e.g. `0-180` |
+
 ### Rooms and groups
 
 | Room (Z2M group) | Group id | Floor plan shape id | Note |
@@ -118,6 +129,22 @@ Three tabs:
 - Optimised for phone portrait; works on desktop too.
 - Live state updates (lamps switched by wall switches appear immediately).
 
+### Floor plan tab in detail
+
+- Each lamp is drawn at its real position and shape (`shape`, `geometry_cm`): dot, line/strip or panel.
+- **Tap a lamp:** toggle on/off. **Brightness:** a slider for the selected lamp (e.g. on long-press or in a small bottom sheet). On/off-only lamps (plugs) have no slider.
+- **Colour is global only:** one master colour slider for the whole apartment; no per-lamp colour anywhere in the UI.
+
+### Live lighting rendering
+
+A rough visual impression of the light in the apartment, updated live from lamp state. It must look good but stay cheap.
+
+- The unlit plan is shown dimmed; every lamp that is on adds a soft glow in the current master colour (mired → Kelvin → RGB approximation), intensity proportional to its brightness. Glows add up (additive / screen blending).
+- Glow shape follows the geometry: radial for points and panels, a soft band along lines and strips.
+- Spread depends on `mount`: `ceiling` = wide and soft (lights most of the room), `middle` = medium, `floor` = narrow and strong near the source, `vertical` = medium.
+- Each glow is **clipped to its room's shape** (walls block light). Light leaking through door openings is optional, later.
+- Approximate, not physically correct. No continuous animation: redraw only when state changes, with a short fade. SVG gradients/filters or Canvas 2D; no WebGL needed. Must stay smooth on a mid-range phone.
+
 ## 9. Power recording
 
 - Record power for **all** smart plugs with metering (`TS011F`: pveSwitch, kuecheWasserkocher, wzTowerlampe, wzLavalampe) *(default)*.
@@ -145,7 +172,7 @@ Hue tap dial switches, Hue smart buttons (incl. kettle button and kettle timer),
 
 ## 13. Open
 
-- [ ] Lamp positions (`pos_x_cm`, `pos_y_cm` in sheet *Devices*)
+- [x] Lamp positions and mounting height (sheet *Devices*)
 - [ ] Scene brightness per lamp (sheet *SceneBrightness*)
 - [ ] Room display name for Wohnzimmer/Schlafzimmer
 - [ ] UI language (German assumed)
