@@ -90,6 +90,13 @@ Four phases, each with one scene. Scene names are the same in every group (Z2M i
 - **Scenes are owned by the app**, defined in `scene_brightness.csv` (per lamp: brightness 1–100 % or off; plugs on/off). Do **not** use Zigbee `scene_recall`: Z2M does not expose stored scene brightness over MQTT, and recall would flash the scene's own colour.
 - **At a phase change, rooms that are on fade automatically to the new phase scene**; the room's dim factor resets to 1. Rooms that are off stay off.
 
+### Manual "next phase"
+
+- A button in the app moves the day phase one step forward **now**: kalt → warm → twilight → night. It behaves exactly like an automatic phase change: rooms that are on fade to the new scene, **no lamp changes its on/off state**, wall switches use the new phase from then on.
+- In phase **night** the button does nothing (disabled).
+- Colour changes to the new phase's colour within a few seconds (no 60-min ramp). A manual colour override from the master slider ends.
+- **The schedule never steps backwards:** after a manual advance, the schedule takes over again at its next boundary that leads to a *later* phase, or at the start of `kalt` the next morning. Example: advanced to night at 20:00 → the scheduled twilight at 21:00 is skipped, the day restarts with kalt at 07:00.
+
 ## 6. Brightness and dimming
 
 - Each room has an **active scene** and a **dim factor `f`** (starts at 1).
@@ -180,6 +187,14 @@ Three tabs:
 
 - Optimised for phone portrait; works on desktop too.
 - Live state updates (lamps switched by wall switches appear immediately).
+
+### Phase bar and "next phase" button (floor plan tab, next to each other)
+
+- A thin horizontal bar for **today**: 00:00 at the left edge, 23:59 at the right. Segment lengths are proportional to the real phase times.
+- Colours: **night = black**, **kalt = blue**, **warm = orange**, **twilight = a less bright orange**. Night appears twice (before kalt and after night begins).
+- A marker shows the current time.
+- The bar shows **today's effective times**: sun-mode times computed for today, edited times immediately, an early day start from the sunrise wake-up, and a manual advance (the boundary moves to the moment of the press).
+- The "next phase" button sits right next to the bar and is disabled during night.
 
 ### Floor plan tab in detail
 
