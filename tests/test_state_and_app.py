@@ -59,6 +59,13 @@ def test_action_is_event_not_state(store):
     assert [(a.name, a.action) for a in actions] == [("flurLichtschalter", "on_press")]
 
 
+def test_plugs_ignore_group_copied_light_values(store):
+    """Seen live: plugs in Alle_Lampen report color_temp copied from group commands."""
+    msg(store, "wzTowerlampe", {"state": "ON", "color_temp": 309, "power": 7})
+    dev = store.get("wzTowerlampe")
+    assert (dev.state, dev.color_temp, dev.brightness, dev.power) == ("ON", None, None, 7)
+
+
 def test_power_tracked(store):
     msg(store, "pveSwitch", {"state": "ON", "power": 41.5, "energy": 120.3})
     assert store.get("pveSwitch").power == 41.5

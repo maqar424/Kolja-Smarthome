@@ -148,9 +148,13 @@ class StateStore:
         if isinstance(action, str) and action:
             self._emit(ActionEvent(name, action, now))
 
+        # Z2M copies group command values into every member's state, so plugs
+        # in Alle_Lampen "report" a color_temp they don't have. Ignore light
+        # attributes for devices that can't dim.
+        dimmable = self.config.devices[name].dimmable
         changes: dict[str, tuple[Any, Any]] = {}
         for key in TRACKED_KEYS:
-            if key not in data:
+            if key not in data or (not dimmable and key in ("brightness", "color_temp")):
                 continue
             new = data[key]
             if key == "state" and isinstance(new, str):
