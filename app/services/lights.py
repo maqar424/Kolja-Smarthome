@@ -94,8 +94,11 @@ class LightService:
     def is_on(self, name: str) -> bool:
         return self.state.get(name).is_on
 
-    def room_is_on(self, room: str) -> bool:
-        return any(self.is_on(d.friendly_name) for d in self.config.lamps(room))
+    def room_is_on(self, room: str, *, ignore_locked: bool = False) -> bool:
+        lamps = self.config.lamps(room)
+        if ignore_locked:
+            lamps = self._unlocked(lamps)
+        return any(self.is_on(d.friendly_name) for d in lamps)
 
     def _unlocked(self, lamps: list[Device]) -> list[Device]:
         return [d for d in lamps if d.friendly_name not in self.locked]
@@ -167,9 +170,13 @@ class LightService:
         return True
 
     async def on_phase_change(self, phase: str) -> None:
-        """Rooms that are on fade to the new scene; rooms that are off stay off."""
+        """Rooms that are on fade to the new scene; rooms that are off stay off.
+
+        A room lit only by a running sunrise counts as off here: otherwise a
+        phase boundary during the animation would switch on the room's other lamps.
+        """
         for room in self.config.rooms:
-            if self.room_is_on(room):
+            if self.room_is_on(room, ignore_locked=True):
                 log.info("Phase %s: fading %s", phase, room)
                 await self.apply_scene(room, phase, transition=T_PHASE, explicit=False)
             else:
@@ -191,7 +198,22 @@ class LightService:
         if verify:
             self._spawn(self.verify({d.friendly_name: False for d in self._unlocked(lamps)}))
 
-    async def verify(self, expected_on: dict[str, bool], delay: float = VERIFY_DELAY_S) -> list[str]:
+    async def verify_critical(
+        self, expected_on: dict[str, bool], delay: float = VERIFY_DELAY_S
+    ) -> list[str]:
+        """Verify, resend, verify again. Returns lamps that still did not follow.
+
+        For critical commands (sunrise): checks locked lamps too.
+        """
+        if self.publisher.dry_run:
+            return []
+        await self.verify(expected_on, delay, include_locked=True)
+        await self.clock.sleep(delay)
+        return [name for name, want_on in expected_on.items() if self.is_on(name) != want_on]
+
+    async def verify(
+        self, expected_on: dict[str, bool], delay: float = VERIFY_DELAY_S, *, include_locked: bool = False
+    ) -> list[str]:
         """After `delay`, resend individually to lamps whose reported state differs.
 
         Group commands are unacknowledged; this catches lamps that missed one.
@@ -203,7 +225,7 @@ class LightService:
         mired = self._mired()
         resent = []
         for name, want_on in expected_on.items():
-            if name in self.locked or self.is_on(name) == want_on:
+            if (name in self.locked and not include_locked) or self.is_on(name) == want_on:
                 continue
             lamp = self.config.devices[name]
             log.warning("Verify: %s did not follow (wanted %s) - resending", name, "ON" if want_on else "OFF")

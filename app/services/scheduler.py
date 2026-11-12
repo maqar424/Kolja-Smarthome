@@ -68,6 +68,13 @@ class Scheduler:
         await self.lights.sync_colour(T_JUMP if prompt else T_COLOUR)
         self.heartbeat = now
 
+    def mark_current_phase_applied(self) -> None:
+        """Someone else (the sunrise final) already put the lamps into this phase's state."""
+        now = self.clock.now()
+        timeline = self.schedule.timeline(now)
+        last = timeline.last_boundary(now)
+        self.store.set_applied_phase(timeline.phase, last.at if last else now)
+
     async def _wait(self) -> bool:
         """Sleep until the next tick. True if woken by a change (respond quickly)."""
         now = self.clock.now()

@@ -149,6 +149,15 @@ async def test_all_on_lights_every_room(rig):
 # --------------------------------------------------------------------------- locks (sunrise)
 
 
+async def test_room_lit_only_by_sunrise_counts_as_off_at_phase_change(rig):
+    rig.z2m.report("wzBodenstrips", state="ON", brightness=20, color_temp=300)
+    rig.lights.locked = {"wzBodenstrips", "wzSchreibtischlampe", "wzDeckenlampe"}
+    rig.z2m.clear()
+    await rig.lights.on_phase_change("kalt")
+    assert rig.z2m.sent == []
+    assert not rig.lamp("wzBettlampe").is_on
+
+
 async def test_locked_lamps_are_never_touched(rig):
     locked = {"wzBodenstrips", "wzSchreibtischlampe", "wzDeckenlampe"}
     for name in locked:
