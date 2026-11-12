@@ -72,7 +72,7 @@ class Publisher:
         self._transport = transport
 
     def add_listener(self, listener: Callable[[SentCommand], None]) -> None:
-        """Called after every accepted command (also in dry run), e.g. to track pending states."""
+        """Called for every accepted command right before it is published (also in dry run)."""
         self._listeners.append(listener)
 
     # ------------------------------------------------------------------ public
@@ -86,6 +86,14 @@ class Publisher:
         topic = f"{self._base}/{target}/set"
         text = json.dumps(clean, separators=(",", ":"))
         cmd = SentCommand(self._clock.now().timestamp(), target, topic, clean, self.dry_run)
+        # Tell listeners *before* publishing: Z2M's state reply can arrive before
+        # publish() returns, and the light service must already know the
+        # resulting ON was ours (not "switched on outside the app").
+        for listener in self._listeners:
+            try:
+                listener(cmd)
+            except Exception:  # noqa: BLE001
+                log.exception("Publisher listener failed")
 
         if self.dry_run:
             log.info("DRY RUN  %s  %s", topic, text)
@@ -101,11 +109,6 @@ class Publisher:
             log.info("SEND     %s  %s", topic, text)
 
         self.history.append(cmd)
-        for listener in self._listeners:
-            try:
-                listener(cmd)
-            except Exception:  # noqa: BLE001
-                log.exception("Publisher listener failed")
         return True
 
     async def request_state(self, target: str) -> bool:
