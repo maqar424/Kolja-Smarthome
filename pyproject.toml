@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kolja-smarthome"
+version = "0.1.0"
+description = "Lamp remote (PWA) and automation service for Kolja's Zigbee lamps"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
+    "aiomqtt>=2.3",
+    "astral>=3.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "openpyxl>=3.1",   # only for tools/import_sheet.py, not needed in the container
+    "httpx>=0.27",     # FastAPI TestClient
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
