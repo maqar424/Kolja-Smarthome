@@ -22,6 +22,7 @@ from app.clock import Clock, RealClock
 from app.config import AppConfig, Settings
 from app.mqtt.client import MqttClient
 from app.mqtt.publisher import Publisher
+from app.services.buttons import ButtonService
 from app.services.lights import LightService
 from app.services.schedule import Schedule
 from app.services.scheduler import Scheduler
@@ -44,6 +45,7 @@ class Services:
     schedule: Schedule
     lights: LightService
     scheduler: Scheduler
+    buttons: ButtonService
 
 
 def build_services(
@@ -67,7 +69,8 @@ def build_services(
     schedule = Schedule(store, clock)
     lights = LightService(config, state, publisher, store, clock, phase=schedule.phase, mired=schedule.mired)
     scheduler = Scheduler(schedule, lights, store, clock)
-    return Services(settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler)
+    buttons = ButtonService(config, state, lights, publisher, store, clock, enabled=settings.buttons_enabled)
+    return Services(settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler, buttons)
 
 
 def create_app(services: Services) -> FastAPI:
@@ -80,6 +83,7 @@ def create_app(services: Services) -> FastAPI:
         if services.mqtt:
             tasks.append(asyncio.create_task(services.mqtt.run(), name="mqtt"))
             tasks.append(asyncio.create_task(_start_scheduler(services), name="scheduler"))
+        services.buttons.resume()  # finish a kettle timer that ran before a restart
         yield
         for task in tasks:
             task.cancel()
