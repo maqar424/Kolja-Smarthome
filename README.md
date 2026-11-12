@@ -5,7 +5,7 @@ Self-hosted PWA and automation service for the Zigbee lamps in Kolja's apartment
 - Spec: [`docs/requirements.md`](docs/requirements.md)
 - Rules for working on this repo: [`CLAUDE.md`](CLAUDE.md)
 
-> Status: milestone M3 done. Live lamp state, day phases (manual + sun mode), global colour with ramps, scenes, dimming, all on/off (HTTP API), wall switches incl. Flur hold and the kettle button (only with `BUTTONS_ENABLED=true`). No sunrise (M4) or UI (M5) yet.
+> Status: milestone M4 done. Live lamp state, day phases (manual + sun mode), global colour with ramps, scenes, dimming, all on/off, wall switches incl. Flur hold and kettle button (only with `BUTTONS_ENABLED=true`), sunrise wake-up incl. test run, all via an HTTP API. No UI yet (M5).
 
 ## Setup (dev VM)
 
@@ -62,6 +62,8 @@ curl -X POST localhost:8000/api/schedule/next                       # "Nächste 
 curl -X POST localhost:8000/api/rooms/Bad/dim -H 'content-type: application/json' -d '{"direction":"down"}'
 curl -X POST localhost:8000/api/colour -H 'content-type: application/json' -d '{"master_ct":0.5}'
 curl -X DELETE localhost:8000/api/colour                            # back to automatic
+curl localhost:8000/api/sunrise                                     # sunrise settings, next run, warning
+curl -X POST localhost:8000/api/sunrise/test                        # ~1 min test run (animation + alle_kalt)
 ```
 
 State (settings, manual advances, room scenes) lives in `DATA_DIR/smarthome.db` (SQLite).
@@ -78,4 +80,5 @@ With `DRY_RUN=true` every command is only logged (`DRY RUN  zigbee2mqtt/... {...
 - **Pure logic with an injected clock** (`app/domain/`): phases, colour and dimming are functions of settings, stored events and `now`. Tests jump through days with a fake clock; after a restart the app computes exactly where it should be.
 - **Never steps backwards**: the phase timeline is one walk through all boundaries in time order; a boundary applies only if it moves the phase forward (kalt always starts a new day). A manual "next phase" is just another event in that walk.
 - **Self-healing colour**: every 30 s the scheduler compares each lit lamp's *reported* colour with the target and corrects differences. That handles ramps, lamps powered on later, and lost commands the same way.
+- **Sunrise records**: each day's run is stored (running / fallback / done / cancelled / missed). After a restart the record decides: resume the animation at the right point, apply the final state, or report a missed run. A run with problems leaves a warning (also in `/health`); a good run shows nothing.
 - **Durations in UTC**: Python adds/subtracts aware local datetimes in wall-clock time, which is wrong on DST days. Durations are computed with UTC/timestamps; local time is only used for "07:00 today".
