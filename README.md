@@ -5,7 +5,7 @@ Self-hosted PWA and automation service for the Zigbee lamps in Kolja's apartment
 - Spec: [`docs/requirements.md`](docs/requirements.md)
 - Rules for working on this repo: [`CLAUDE.md`](CLAUDE.md)
 
-> Status: milestone M2 done. Live lamp state, day phases (manual + sun mode), global colour with ramps, scenes, dimming, all on/off, all via an HTTP API. No wall switches (M3), sunrise (M4) or UI (M5) yet.
+> Status: milestone M3 done. Live lamp state, day phases (manual + sun mode), global colour with ramps, scenes, dimming, all on/off (HTTP API), wall switches incl. Flur hold and the kettle button (only with `BUTTONS_ENABLED=true`). No sunrise (M4) or UI (M5) yet.
 
 ## Setup (dev VM)
 
