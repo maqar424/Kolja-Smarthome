@@ -65,7 +65,14 @@ class FakeZ2M:
                 for d in self.snapshot["devices"]
             ]
             await pub(f"{self.base}/bridge/devices", json.dumps(live_devices), retain=True)
-            await pub(f"{self.base}/bridge/groups", json.dumps(self.snapshot["groups"]), retain=True)
+            # Live Z2M lists group members by ieee_address only (no friendly_name).
+            ieee = {d["friendly_name"]: d["ieee_address"] for d in self.snapshot["devices"]}
+            live_groups = [
+                {**g, "members": [{"ieee_address": ieee[m["friendly_name"]], "endpoint": m["endpoint"]}
+                                  for m in g["members"]]}
+                for g in self.snapshot["groups"]
+            ]
+            await pub(f"{self.base}/bridge/groups", json.dumps(live_groups), retain=True)
             self._ready.set()
             async for message in client.messages:
                 await self._handle(str(message.topic), message.payload)

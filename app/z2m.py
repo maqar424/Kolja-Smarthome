@@ -5,6 +5,21 @@ from __future__ import annotations
 from typing import Any
 
 
+def group_member_names(group: dict, devices: list[dict]) -> set[str]:
+    """Friendly names of a group's members.
+
+    Live `bridge/groups` lists members as {"ieee_address", "endpoint"} only;
+    the trimmed snapshot has {"friendly_name", "endpoint"}. Handle both, using
+    `bridge/devices` to map addresses to names.
+    """
+    by_ieee = {d.get("ieee_address"): d.get("friendly_name") for d in devices}
+    names = set()
+    for member in group.get("members", []):
+        name = member.get("friendly_name") or by_ieee.get(member.get("ieee_address"))
+        names.add(name or f"<unknown {member.get('ieee_address')}>")
+    return names
+
+
 def capabilities_from_exposes(exposes: list[dict]) -> dict[str, Any]:
     """Summarise Z2M `exposes` into what the app needs to know.
 

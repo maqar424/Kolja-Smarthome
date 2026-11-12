@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 
 from app.config import ALL_LAMPS_GROUP, COMMON_MIRED, AppConfig
-from app.z2m import capabilities_from_exposes
+from app.z2m import capabilities_from_exposes, group_member_names
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def check_consistency(config: AppConfig, z2m_devices: list[dict], z2m_groups: li
     if all_lamps is None:
         warnings.append(f"Z2M group {ALL_LAMPS_GROUP} missing")
     else:
-        members = {m.get("friendly_name") for m in all_lamps.get("members", [])}
+        members = group_member_names(all_lamps, z2m_devices)
         flagged = {d.friendly_name for d in config.devices.values() if d.in_all_off}
         for name in sorted(flagged - members):
             warnings.append(f"{name}: in_all_off = yes but not in Z2M group {ALL_LAMPS_GROUP}")

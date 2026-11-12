@@ -115,6 +115,17 @@ def test_consistency_live_format_with_definition(config, z2m_snapshot):
     assert check_consistency(config, live, z2m_snapshot["groups"]) == []
 
 
+def test_consistency_live_groups_by_ieee_address(config, z2m_snapshot):
+    """Live bridge/groups has members as {ieee_address, endpoint} only (found on the real Pi)."""
+    ieee = {d["friendly_name"]: d["ieee_address"] for d in z2m_snapshot["devices"]}
+    groups = copy.deepcopy(z2m_snapshot["groups"])
+    for g in groups:
+        g["members"] = [{"ieee_address": ieee[m["friendly_name"]], "endpoint": m["endpoint"]} for m in g["members"]]
+    assert check_consistency(config, z2m_snapshot["devices"], groups) == []
+    groups[-1]["members"].append({"ieee_address": ieee["pveSwitch"], "endpoint": 1})
+    assert any("PROTECTED" in w and "pveSwitch" in w for w in check_consistency(config, z2m_snapshot["devices"], groups))
+
+
 def test_consistency_reports_problems(config, z2m_snapshot):
     devices = [d for d in z2m_snapshot["devices"] if d["friendly_name"] != "flurDeckenstrip"]
     groups = copy.deepcopy(z2m_snapshot["groups"])
