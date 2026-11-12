@@ -15,7 +15,7 @@ It is opened in the phone browser and can be installed to the home screen.
 
 | Component | Details |
 |---|---|
-| Raspberry Pi 4 | Docker host. Containers: `mosquitto_broker`, `zigbee2mqtt`, `smarthome_hub` (old, to be removed) |
+| Raspberry Pi 4 | 64-bit OS (`aarch64`), clock NTP-synchronised. Docker host. Containers: `mosquitto_broker`, `zigbee2mqtt`, `smarthome_hub` (old, to be removed) |
 | MQTT broker | `eclipse-mosquitto`, port 1883 published on the Pi, anonymous (LAN only) |
 | Zigbee2MQTT | `koenkk/zigbee2mqtt:2.12.1`, base topic `zigbee2mqtt`, frontend on port 8080, talks to broker as `mqtt://mosquitto:1883` |
 | Coordinator | Network coordinator (Z-Stack) at `192.168.0.198:6638` |
@@ -241,9 +241,9 @@ Hue tap dial switches, Hue smart buttons (incl. kettle button and kettle timer),
 ## 13. Open
 
 - [x] Lamp positions and mounting height (sheet *Devices*)
-- [ ] Scene brightness per lamp (sheet *SceneBrightness*)
+- [x] Scene brightness per lamp (sheet *SceneBrightness*, from Zigbee scenes, reviewed)
 - [x] Room display name: Schlafzimmer
 - [x] UI language: German
 - [ ] Pi IP address, fixed via DHCP reservation?
-- [ ] Verified: VM reaches the broker on port 1883
-- [ ] `CLAUDE.md`
+- [x] Verified: VM reaches the broker on port 1883
+- [x] `CLAUDE.md`
