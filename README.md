@@ -5,7 +5,7 @@ Self-hosted PWA and automation service for the Zigbee lamps in Kolja's apartment
 - Spec: [`docs/requirements.md`](docs/requirements.md)
 - Rules for working on this repo: [`CLAUDE.md`](CLAUDE.md)
 
-> Status: early development (milestone M1, core). The app connects to MQTT, tracks live lamp state and serves `/health` and `/api/state`. No automation or UI yet.
+> Status: milestone M2 done. Live lamp state, day phases (manual + sun mode), global colour with ramps, scenes, dimming, all on/off, all via an HTTP API. No wall switches (M3), sunrise (M4) or UI (M5) yet.
 
 ## Setup (dev VM)
 
@@ -46,15 +46,36 @@ Errors (sheet inconsistent with itself) stop the import; warnings (sheet vs. Zig
 
 ```bash
 source .venv/bin/activate
-uvicorn app.main:app --port 8000
+uvicorn app.main:create_default_app --factory --port 8000
 ```
 
 - http://localhost:8000/health – MQTT, Zigbee2MQTT and clock status (HTTP 503 while degraded)
 - http://localhost:8000/api/state – rooms and live lamp/plug state
 - http://localhost:8000/api/debug/commands – last commands sent (or only logged in dry run)
+- http://localhost:8000/api/schedule – current phase, today's phase bar, colour, settings
+- http://localhost:8000/docs – interactive list of all endpoints
+
+Try actions with curl (in dry run they are only logged):
+
+```bash
+curl -X POST localhost:8000/api/schedule/next                       # "Nächste Phase"
+curl -X POST localhost:8000/api/rooms/Bad/dim -H 'content-type: application/json' -d '{"direction":"down"}'
+curl -X POST localhost:8000/api/colour -H 'content-type: application/json' -d '{"master_ct":0.5}'
+curl -X DELETE localhost:8000/api/colour                            # back to automatic
+```
+
+State (settings, manual advances, room scenes) lives in `DATA_DIR/smarthome.db` (SQLite).
 
 With `DRY_RUN=true` every command is only logged (`DRY RUN  zigbee2mqtt/... {...}`). Lamp states are not retained by Zigbee2MQTT, so at startup the app asks each lamp once (`<lamp>/get`). In dry run that only happens with `DRY_RUN_ALLOW_READS=true`; otherwise states show up as lamps report changes.
 
 ## Deploy (Pi)
 
 *Coming in M8.* Planned: `git pull && docker compose up -d --build`, HTTPS via `tailscale serve`.
+
+## How it works (short)
+
+- **One publish chokepoint** (`app/mqtt/publisher.py`): every MQTT command passes the hard-rule guards (never pveSwitch, no scene_recall, no colour to plugs, groups only "off", colour clamped to 153–370) and the dry-run switch.
+- **Pure logic with an injected clock** (`app/domain/`): phases, colour and dimming are functions of settings, stored events and `now`. Tests jump through days with a fake clock; after a restart the app computes exactly where it should be.
+- **Never steps backwards**: the phase timeline is one walk through all boundaries in time order; a boundary applies only if it moves the phase forward (kalt always starts a new day). A manual "next phase" is just another event in that walk.
+- **Self-healing colour**: every 30 s the scheduler compares each lit lamp's *reported* colour with the target and corrects differences. That handles ramps, lamps powered on later, and lost commands the same way.
+- **Durations in UTC**: Python adds/subtracts aware local datetimes in wall-clock time, which is wrong on DST days. Durations are computed with UTC/timestamps; local time is only used for "07:00 today".

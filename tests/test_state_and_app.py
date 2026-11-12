@@ -11,6 +11,7 @@ from app.consistency import check_consistency
 from app.main import build_services, create_app
 from app.mqtt.publisher import Publisher
 from app.state import ActionEvent, BridgeChanged, StateChanged, StateStore
+from app.store import Store
 from app.sysclock import clock_synchronised
 
 
@@ -179,7 +180,7 @@ async def test_state_read_in_dry_run_needs_opt_in(config, clock):
 
 @pytest.fixture
 def client(config, clock):
-    services = build_services(Settings.load(env={}, env_file=None), config, clock, with_mqtt=False)
+    services = build_services(Settings.load(env={}, env_file=None), config, clock, with_mqtt=False, store=Store(":memory:"))
     with TestClient(create_app(services)) as c:
         c.services = services
         yield c

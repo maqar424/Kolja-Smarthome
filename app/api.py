@@ -1,0 +1,141 @@
+"""HTTP API for the PWA (and curl during development).
+
+All actions go through the services; nothing here talks to MQTT directly.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Literal
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+
+from app.domain.colour import to_mired
+
+if TYPE_CHECKING:
+    from app.main import Services
+
+
+class ColourIn(BaseModel):
+    master_ct: float = Field(ge=0, le=1)
+
+
+class DimIn(BaseModel):
+    direction: Literal["up", "down"]
+
+
+class SceneIn(BaseModel):
+    scene: Literal["kalt", "warm", "twilight", "night"]
+
+
+class LampIn(BaseModel):
+    on: bool | None = None
+    brightness: int | None = Field(default=None, ge=1, le=254)
+
+
+def build_router(services: "Services") -> APIRouter:
+    router = APIRouter(prefix="/api")
+    cfg = services.config
+    lights = services.lights
+    schedule = services.schedule
+
+    def room_or_404(room: str) -> str:
+        if room not in cfg.rooms:
+            raise HTTPException(404, f"Unbekannter Raum: {room}")
+        return room
+
+    # ------------------------------------------------------------------ schedule / colour
+
+    @router.get("/schedule")
+    async def get_schedule():
+        now = services.clock.now()
+        timeline = schedule.timeline(now)
+        colour = schedule.colour(now, timeline)
+        nxt = timeline.next_boundary(now)
+        return {
+            "now": now.isoformat(timespec="seconds"),
+            "phase": timeline.phase,
+            "can_advance": timeline.can_advance(),
+            "next_phase": timeline.next_phase(),
+            "next_boundary": {"phase": nxt.phase, "at": nxt.at.isoformat(timespec="seconds")} if nxt else None,
+            "segments": [
+                {"phase": s.phase, "start": s.start.isoformat(timespec="seconds"),
+                 "end": s.end.isoformat(timespec="seconds")}
+                for s in timeline.segments(now.date())
+            ],
+            "colour": {
+                "master_ct": round(colour.master_ct, 4),
+                "mired": to_mired(colour.master_ct),
+                "ramping": colour.ramping,
+                "override": colour.override,
+            },
+            "settings": schedule.settings.to_dict(),
+        }
+
+    @router.post("/schedule/next")
+    async def next_phase():
+        phase = schedule.advance()
+        if phase is None:
+            raise HTTPException(409, "In der Nacht gibt es keine nächste Phase.")
+        return {"phase": phase}
+
+    @router.put("/schedule/settings")
+    async def put_settings(data: dict):
+        errors = schedule.update_settings(data)
+        if errors:
+            raise HTTPException(400, {"errors": errors})
+        return schedule.settings.to_dict()
+
+    @router.post("/colour")
+    async def set_colour(body: ColourIn):
+        schedule.set_override(body.master_ct)
+        return {"master_ct": body.master_ct, "mired": to_mired(body.master_ct)}
+
+    @router.delete("/colour")
+    async def colour_automatic():
+        schedule.clear_override()
+        return {"override": False}
+
+    # ------------------------------------------------------------------ rooms / lamps
+
+    @router.post("/rooms/{room}/on")
+    async def room_on(room: str):
+        await lights.room_on(room_or_404(room))
+        return {"ok": True}
+
+    @router.post("/rooms/{room}/off")
+    async def room_off(room: str):
+        await lights.room_off(room_or_404(room))
+        return {"ok": True}
+
+    @router.post("/rooms/{room}/dim")
+    async def room_dim(room: str, body: DimIn):
+        changed = await lights.dim(room_or_404(room), body.direction)
+        return {"changed": changed}
+
+    @router.post("/rooms/{room}/scene")
+    async def room_scene(room: str, body: SceneIn):
+        await lights.apply_scene(room_or_404(room), body.scene, transition=0.4, explicit=True)
+        return {"ok": True}
+
+    @router.post("/lamps/{name}")
+    async def lamp(name: str, body: LampIn):
+        device = cfg.devices.get(name)
+        if device is None or not device.is_lamp:
+            raise HTTPException(404, f"Unbekannte Lampe: {name}")
+        if name in lights.locked:
+            raise HTTPException(409, "Sonnenaufgang läuft")
+        ok = await lights.set_lamp(name, on=body.on, brightness=body.brightness)
+        return {"ok": ok}
+
+    @router.post("/all-off")
+    async def all_off():
+        await lights.all_off()
+        return {"ok": True}
+
+    @router.post("/all-on")
+    async def all_on():
+        await lights.all_on()
+        return {"ok": True}
+
+    return router

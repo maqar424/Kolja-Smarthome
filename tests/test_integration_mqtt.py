@@ -15,6 +15,7 @@ import pytest
 from app.clock import FakeClock
 from app.config import AppConfig, Settings
 from app.main import build_services
+from app.store import Store
 from tests.fake_z2m import FakeZ2M
 
 HOST = os.environ.get("TEST_MQTT_HOST", "127.0.0.1")
@@ -50,7 +51,7 @@ def make_services(base_topic, *, dry_run):
         env={"MQTT_HOST": HOST, "MQTT_PORT": str(PORT), "Z2M_BASE_TOPIC": base_topic, "DRY_RUN": str(dry_run)},
         env_file=None,
     )
-    return build_services(settings, AppConfig.load(), FakeClock(datetime(2026, 11, 12, 20, 0)))
+    return build_services(settings, AppConfig.load(), FakeClock(datetime(2026, 11, 12, 20, 0)), store=Store(":memory:"))
 
 
 async def run_app(services):

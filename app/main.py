@@ -1,6 +1,9 @@
 """FastAPI application: wires config, clock, state, publisher and MQTT together.
 
-Run locally:  uvicorn app.main:app --port 8000
+Run locally:  uvicorn app.main:create_default_app --factory --port 8000
+
+(A factory instead of a module-level `app` so that importing this module,
+e.g. in tests, does not open the database or read .env.)
 """
 
 from __future__ import annotations
@@ -14,11 +17,16 @@ from dataclasses import dataclass
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
+from app.api import build_router
 from app.clock import Clock, RealClock
 from app.config import AppConfig, Settings
 from app.mqtt.client import MqttClient
 from app.mqtt.publisher import Publisher
+from app.services.lights import LightService
+from app.services.schedule import Schedule
+from app.services.scheduler import Scheduler
 from app.state import StateStore
+from app.store import Store
 from app.sysclock import clock_synchronised
 
 log = logging.getLogger("app")
@@ -32,9 +40,21 @@ class Services:
     state: StateStore
     publisher: Publisher
     mqtt: MqttClient | None
+    store: Store
+    schedule: Schedule
+    lights: LightService
+    scheduler: Scheduler
 
 
-def build_services(settings: Settings, config: AppConfig, clock: Clock, *, with_mqtt: bool = True) -> Services:
+def build_services(
+    settings: Settings,
+    config: AppConfig,
+    clock: Clock,
+    *,
+    with_mqtt: bool = True,
+    store: Store | None = None,
+) -> Services:
+    store = store or Store(settings.data_dir / "smarthome.db")
     state = StateStore(config, clock, base_topic=settings.base_topic)
     publisher = Publisher(
         config,
@@ -44,7 +64,10 @@ def build_services(settings: Settings, config: AppConfig, clock: Clock, *, with_
         allow_reads_in_dry_run=settings.dry_run_allow_reads,
     )
     mqtt = MqttClient(settings, config, state, publisher) if with_mqtt else None
-    return Services(settings, config, clock, state, publisher, mqtt)
+    schedule = Schedule(store, clock)
+    lights = LightService(config, state, publisher, store, clock, phase=schedule.phase, mired=schedule.mired)
+    scheduler = Scheduler(schedule, lights, store, clock)
+    return Services(settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler)
 
 
 def create_app(services: Services) -> FastAPI:
@@ -53,23 +76,30 @@ def create_app(services: Services) -> FastAPI:
         s = services.settings
         log.info("Starting - dry run: %s, buttons enabled: %s, broker: %s:%s",
                  s.dry_run, s.buttons_enabled, s.mqtt_host, s.mqtt_port)
-        task = asyncio.create_task(services.mqtt.run(), name="mqtt") if services.mqtt else None
+        tasks = []
+        if services.mqtt:
+            tasks.append(asyncio.create_task(services.mqtt.run(), name="mqtt"))
+            tasks.append(asyncio.create_task(_start_scheduler(services), name="scheduler"))
         yield
-        if task:
+        for task in tasks:
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
 
     app = FastAPI(title="Kolja-Smarthome", lifespan=lifespan)
     app.state.services = services
+    app.include_router(build_router(services))
 
     @app.get("/health")
     async def health():
         mqtt_ok = services.mqtt.connected if services.mqtt else False
         z2m_ok = services.state.bridge_online is True
         synced = clock_synchronised()
+        beat = services.scheduler.heartbeat
+        scheduler_ok = beat is not None and services.clock.now().timestamp() - beat.timestamp() < 120  # timestamps: DST-safe
         body = {
-            "status": "ok" if (mqtt_ok and z2m_ok and synced is not False) else "degraded",
+            "status": "ok" if (mqtt_ok and z2m_ok and synced is not False and scheduler_ok) else "degraded",
+            "scheduler_alive": scheduler_ok,
             "mqtt_connected": mqtt_ok,
             "z2m_online": z2m_ok,
             "clock_synchronised": synced,
@@ -92,6 +122,7 @@ def create_app(services: Services) -> FastAPI:
                     "svg_id": r.svg_id,
                     "lamps": [d.friendly_name for d in cfg.lamps(r.room)],
                     "on": bool(services.state.lamps_on(r.room)),
+                    **services.store.room_light(r.room).to_dict(),
                 }
                 for r in cfg.rooms.values()
             ],
@@ -102,6 +133,7 @@ def create_app(services: Services) -> FastAPI:
                     "dimmable": d.dimmable,
                     "has_colour": d.has_colour,
                     "has_power": d.has_power,
+                    "locked": d.friendly_name in services.lights.locked,
                     **services.state.get(d.friendly_name).snapshot(),
                 }
                 for d in cfg.devices.values()
@@ -120,7 +152,17 @@ def create_app(services: Services) -> FastAPI:
     return app
 
 
-def _default_app() -> FastAPI:
+async def _start_scheduler(services: Services) -> None:
+    """Start the automation once lamp states are known, so the first tick sees reality."""
+    for _ in range(100):  # up to ~10 s
+        if services.mqtt and services.mqtt.connected and services.mqtt.consistency_warnings is not None:
+            break
+        await asyncio.sleep(0.1)
+    await asyncio.sleep(2.0)  # give the state reads a moment to come back
+    await services.scheduler.run()
+
+
+def create_default_app() -> FastAPI:
     settings = Settings.load()
     logging.basicConfig(
         level=settings.log_level,
@@ -128,5 +170,3 @@ def _default_app() -> FastAPI:
     )
     return create_app(build_services(settings, AppConfig.load(), RealClock()))
 
-
-app = _default_app()
