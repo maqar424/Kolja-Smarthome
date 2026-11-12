@@ -1,6 +1,6 @@
 {
   "source": "Zigbee2MQTT 2.12.1 web-UI state export, trimmed. Live equivalent: MQTT topics zigbee2mqtt/bridge/devices and zigbee2mqtt/bridge/groups.",
-  "exported": "2026-11-06",
+  "exported": "2026-11-12",
   "devices": [
     {
       "friendly_name": "pveSwitch",
@@ -3642,6 +3642,10 @@
         },
         {
           "friendly_name": "wzTowerlampe",
+          "endpoint": 1
+        },
+        {
+          "friendly_name": "wzLavalampe",
           "endpoint": 1
         }
       ],

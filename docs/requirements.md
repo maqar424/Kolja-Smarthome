@@ -52,7 +52,7 @@ Coordinates in cm on `apartment-floorplan.svg` (1 SVG unit = 1 cm, origin top-le
 
 | Room (Z2M group) | Group id | Floor plan shape id | Note |
 |---|---|---|---|
-| Wohnzimmer | 4 | `schlafzimmer` | Same room; floor plan calls it Schlafzimmer |
+| Wohnzimmer | 4 | `schlafzimmer` | **Shown as "Schlafzimmer" in the app.** Z2M group and device names (`wz…`) stay as they are |
 | Küche | 3 | `kueche` | |
 | Bad | 2 | `bad` | |
 | Flur | 1 | `flur` | |
@@ -185,6 +185,7 @@ Three tabs:
 |---|---|---|
 | Non-lamp plugs (`pveSwitch`, `kuecheWasserkocher`): live power, read-only, no switching *(default)*. Tap → pop-up chart of power history | `apartment-floorplan.svg` with lamp markers at `pos_x_cm`/`pos_y_cm`, showing on/off and brightness. Tap lamp → on/off, brightness. Tap room → room on/off, dim, scene. Master colour slider and "Alles aus" | Phase times, sun toggle, colour ramp durations, location, back-to-automatic, sunrise wake-up (toggle "Sonnenaufgang", time, duration, "Test") |
 
+- **UI language: German.** Code, comments and docs in English.
 - Optimised for phone portrait; works on desktop too.
 - Live state updates (lamps switched by wall switches appear immediately).
 
@@ -241,8 +242,8 @@ Hue tap dial switches, Hue smart buttons (incl. kettle button and kettle timer),
 
 - [x] Lamp positions and mounting height (sheet *Devices*)
 - [ ] Scene brightness per lamp (sheet *SceneBrightness*)
-- [ ] Room display name for Wohnzimmer/Schlafzimmer
-- [ ] UI language (German assumed)
+- [x] Room display name: Schlafzimmer
+- [x] UI language: German
 - [ ] Pi IP address, fixed via DHCP reservation?
 - [ ] Verified: VM reaches the broker on port 1883
 - [ ] `CLAUDE.md`
