@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from conftest import REPO_ROOT
+from tests.conftest import REPO_ROOT
 
 _spec = importlib.util.spec_from_file_location("import_sheet", REPO_ROOT / "tools" / "import_sheet.py")
 imp = importlib.util.module_from_spec(_spec)

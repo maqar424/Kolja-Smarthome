@@ -54,6 +54,9 @@ class Settings:
     # Safe defaults: nothing is published and buttons are ignored unless
     # explicitly enabled (hard rules 3 and 4).
     dry_run: bool = True
+    # In dry run, also skip the read-only `<lamp>/get` state requests at startup
+    # unless this is set. Without them, lamp states appear only when a lamp reports.
+    dry_run_allow_reads: bool = False
     buttons_enabled: bool = False
     http_port: int = 8000
     data_dir: Path = REPO_ROOT / "data"
@@ -71,6 +74,7 @@ class Settings:
             mqtt_port=int(merged.get("MQTT_PORT") or 1883),
             base_topic=(merged.get("Z2M_BASE_TOPIC") or "zigbee2mqtt").rstrip("/"),
             dry_run=_bool(merged.get("DRY_RUN"), True),
+            dry_run_allow_reads=_bool(merged.get("DRY_RUN_ALLOW_READS"), False),
             buttons_enabled=_bool(merged.get("BUTTONS_ENABLED"), False),
             http_port=int(merged.get("HTTP_PORT") or 8000),
             data_dir=data_dir,

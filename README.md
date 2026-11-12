@@ -5,7 +5,7 @@ Self-hosted PWA and automation service for the Zigbee lamps in Kolja's apartment
 - Spec: [`docs/requirements.md`](docs/requirements.md)
 - Rules for working on this repo: [`CLAUDE.md`](CLAUDE.md)
 
-> Status: early development (milestone M0, project skeleton). Nothing runs yet.
+> Status: early development (milestone M1, core). The app connects to MQTT, tracks live lamp state and serves `/health` and `/api/state`. No automation or UI yet.
 
 ## Setup (dev VM)
 
@@ -22,8 +22,13 @@ Keep `DRY_RUN=true` and `BUTTONS_ENABLED=false` in `.env` during development.
 
 ```bash
 source .venv/bin/activate
-pytest
+pytest                                              # unit tests
+docker compose -f docker-compose.test.yml up -d     # local throwaway broker on 127.0.0.1:18830
+pytest                                              # now also runs the MQTT integration tests
+docker compose -f docker-compose.test.yml down
 ```
+
+The integration tests use a fake Zigbee2MQTT (`tests/fake_z2m.py`) fed from `docs/z2m-snapshot.json`. Without the test broker they are skipped. They never talk to the Pi.
 
 ## Config from Excel
 
@@ -37,9 +42,18 @@ git add docs/devices.xlsx config/ && git commit
 
 Errors (sheet inconsistent with itself) stop the import; warnings (sheet vs. Zigbee2MQTT snapshot, lamp outside its room) are printed but the files are still written. A test fails if `config/` is stale, so a forgotten import is caught by `pytest`.
 
-## Run
+## Run (dev VM)
 
-*Coming in M1.*
+```bash
+source .venv/bin/activate
+uvicorn app.main:app --port 8000
+```
+
+- http://localhost:8000/health – MQTT, Zigbee2MQTT and clock status (HTTP 503 while degraded)
+- http://localhost:8000/api/state – rooms and live lamp/plug state
+- http://localhost:8000/api/debug/commands – last commands sent (or only logged in dry run)
+
+With `DRY_RUN=true` every command is only logged (`DRY RUN  zigbee2mqtt/... {...}`). Lamp states are not retained by Zigbee2MQTT, so at startup the app asks each lamp once (`<lamp>/get`). In dry run that only happens with `DRY_RUN_ALLOW_READS=true`; otherwise states show up as lamps report changes.
 
 ## Deploy (Pi)
 

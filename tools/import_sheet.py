@@ -28,6 +28,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from app.z2m import capabilities_from_exposes  # shared with the running app
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_XLSX = REPO_ROOT / "docs" / "devices.xlsx"
 DEFAULT_SNAPSHOT = REPO_ROOT / "docs" / "z2m-snapshot.json"
@@ -196,34 +198,6 @@ def point_in_polygon(x: float, y: float, polygon: list[tuple[float, float]]) -> 
             if x < x_cross:
                 inside = not inside
     return inside
-
-
-def capabilities_from_exposes(exposes: list[dict]) -> dict:
-    """Summarise Z2M `exposes` into what the app needs to know."""
-    props: dict[str, dict] = {}
-
-    def walk(items: list[dict]) -> None:
-        for item in items:
-            if "features" in item:
-                walk(item["features"])
-            elif item.get("property"):
-                props.setdefault(item["property"], item)
-
-    walk(exposes)
-    caps: dict[str, Any] = {
-        "on_off": "state" in props,
-        "brightness": "brightness" in props and "state" in props,
-        "color_temp": None,
-        "power": "power" in props,
-        "actions": None,
-    }
-    ct = props.get("color_temp")
-    if ct and "state" in props:
-        caps["color_temp"] = [ct.get("value_min"), ct.get("value_max")]
-    action = props.get("action")
-    if action and action.get("values"):
-        caps["actions"] = list(action["values"])
-    return caps
 
 
 # --------------------------------------------------------------------------- building

@@ -56,11 +56,13 @@ class Publisher:
         base_topic: str,
         dry_run: bool,
         transport: Transport | None = None,
+        allow_reads_in_dry_run: bool = False,
     ) -> None:
         self._config = config
         self._clock = clock
         self._base = base_topic
         self.dry_run = dry_run
+        self.allow_reads_in_dry_run = allow_reads_in_dry_run
         self._transport = transport
         self.history: deque[SentCommand] = deque(maxlen=200)
         self.refused_count = 0
@@ -104,6 +106,31 @@ class Publisher:
                 listener(cmd)
             except Exception:  # noqa: BLE001
                 log.exception("Publisher listener failed")
+        return True
+
+    async def request_state(self, target: str) -> bool:
+        """Ask Z2M to read a device's current state (`<name>/get`).
+
+        Read-only, but still a message to the device, so: never for protected
+        devices, only for lamps/appliances, and in DRY_RUN only when
+        `allow_reads_in_dry_run` is set.
+        """
+        device = self._config.devices.get(target)
+        if device is None or device.protected or device.category not in ("light", "appliance") or not device.on_off:
+            self._refuse(target, {"get": "state"}, "state read not allowed for this target")
+            return False
+        topic = f"{self._base}/{target}/get"
+        if self.dry_run and not self.allow_reads_in_dry_run:
+            log.info("DRY RUN  %s  (state read skipped)", topic)
+            return True
+        if self._transport is None:
+            return False
+        try:
+            await self._transport(topic, '{"state":""}')
+        except Exception:  # noqa: BLE001
+            log.exception("State read failed: %s", topic)
+            return False
+        log.debug("GET      %s", topic)
         return True
 
     # ------------------------------------------------------------------ guards
