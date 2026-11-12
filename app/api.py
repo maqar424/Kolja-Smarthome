@@ -138,4 +138,36 @@ def build_router(services: "Services") -> APIRouter:
         await lights.all_on()
         return {"ok": True}
 
+    # ------------------------------------------------------------------ sunrise
+
+    sunrise = services.sunrise
+
+    @router.get("/sunrise")
+    async def sunrise_status():
+        return sunrise.status()
+
+    @router.put("/sunrise/settings")
+    async def sunrise_settings(data: dict):
+        errors = sunrise.update_settings(data)
+        if errors:
+            raise HTTPException(400, {"errors": errors})
+        return sunrise.status()
+
+    @router.post("/sunrise/cancel")
+    async def sunrise_cancel():
+        if not sunrise.cancel():
+            raise HTTPException(409, "Es läuft gerade kein Sonnenaufgang.")
+        return {"ok": True}
+
+    @router.post("/sunrise/test")
+    async def sunrise_test():
+        if not sunrise.start_test():
+            raise HTTPException(409, "Es läuft bereits ein Sonnenaufgang.")
+        return {"ok": True}
+
+    @router.post("/sunrise/dismiss")
+    async def sunrise_dismiss():
+        sunrise.dismiss_warning()
+        return {"ok": True}
+
     return router

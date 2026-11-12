@@ -26,6 +26,7 @@ from app.services.buttons import ButtonService
 from app.services.lights import LightService
 from app.services.schedule import Schedule
 from app.services.scheduler import Scheduler
+from app.services.sunrise import SunriseService
 from app.state import StateStore
 from app.store import Store
 from app.sysclock import clock_synchronised
@@ -46,6 +47,7 @@ class Services:
     lights: LightService
     scheduler: Scheduler
     buttons: ButtonService
+    sunrise: SunriseService
 
 
 def build_services(
@@ -66,11 +68,27 @@ def build_services(
         allow_reads_in_dry_run=settings.dry_run_allow_reads,
     )
     mqtt = MqttClient(settings, config, state, publisher) if with_mqtt else None
-    schedule = Schedule(store, clock)
+    # Schedule needs the sunrise's early day starts and the sunrise needs the
+    # lights, which need the schedule: break the cycle with a late-bound lambda.
+    holder: dict = {}
+    schedule = Schedule(store, clock, wakes=lambda: holder["sunrise"].early_starts())
     lights = LightService(config, state, publisher, store, clock, phase=schedule.phase, mired=schedule.mired)
     scheduler = Scheduler(schedule, lights, store, clock)
-    buttons = ButtonService(config, state, lights, publisher, store, clock, enabled=settings.buttons_enabled)
-    return Services(settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler, buttons)
+    sunrise = SunriseService(
+        config, state, lights, publisher, store, clock,
+        connected=lambda: publisher.dry_run or (mqtt is not None and mqtt.connected),
+        clock_synced=clock_synchronised,
+    )
+    holder["sunrise"] = sunrise
+    sunrise.on_schedule_change = schedule.changed.set
+    sunrise.on_final_applied = scheduler.mark_current_phase_applied
+    buttons = ButtonService(
+        config, state, lights, publisher, store, clock,
+        enabled=settings.buttons_enabled, room_blocked=sunrise.room_blocked,
+    )
+    return Services(
+        settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler, buttons, sunrise
+    )
 
 
 def create_app(services: Services) -> FastAPI:
@@ -110,6 +128,7 @@ def create_app(services: Services) -> FastAPI:
             "dry_run": services.settings.dry_run,
             "buttons_enabled": services.settings.buttons_enabled,
             "refused_commands": services.publisher.refused_count,
+            "sunrise_warning": services.sunrise.warning() is not None,
             "config_warnings": services.mqtt.consistency_warnings if services.mqtt else None,
             "time": services.clock.now().isoformat(timespec="seconds"),
         }
@@ -163,7 +182,14 @@ async def _start_scheduler(services: Services) -> None:
             break
         await asyncio.sleep(0.1)
     await asyncio.sleep(2.0)  # give the state reads a moment to come back
-    await services.scheduler.run()
+    # The sunrise runs as its own task: nothing in the scheduler can block it.
+    sunrise = asyncio.create_task(services.sunrise.run(), name="sunrise")
+    try:
+        await services.scheduler.run()
+    finally:
+        sunrise.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await sunrise
 
 
 def create_default_app() -> FastAPI:

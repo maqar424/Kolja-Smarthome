@@ -119,9 +119,14 @@ class LightService:
 
     # ------------------------------------------------------------------ scenes / rooms
 
-    async def apply_scene(self, room: str, scene: str, *, transition: float, explicit: bool) -> None:
-        """Apply `scene` fully to the room's unlocked lamps (on/off and brightness), f = 1."""
-        mired = self._mired()
+    async def apply_scene(
+        self, room: str, scene: str, *, transition: float, explicit: bool, mired: int | None = None
+    ) -> None:
+        """Apply `scene` fully to the room's unlocked lamps (on/off and brightness), f = 1.
+
+        `mired` overrides the current master colour (sunrise test: show the morning look).
+        """
+        mired = self._mired() if mired is None else mired
         targets = scene_targets(self.config, room, scene)
         for lamp in self._unlocked(self.config.lamps(room)):
             target = targets[lamp.friendly_name]

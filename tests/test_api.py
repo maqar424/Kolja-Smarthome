@@ -95,3 +95,32 @@ def test_state_includes_room_scene_and_lock(api):
     bad = next(r for r in body["rooms"] if r["room"] == "Bad")
     assert bad["scene"] == "kalt" and bad["factor"] == 1.0
     assert body["devices"]["wzDeckenlampe"]["locked"] is False
+
+
+# --------------------------------------------------------------------------- sunrise
+
+
+def test_sunrise_settings_and_status(api):
+    body = api.get("/api/sunrise").json()
+    assert body["settings"]["enabled"] is False and body["next"] is None
+    r = api.put("/api/sunrise/settings", json={"enabled": True, "wake": "06:15", "duration_min": 20})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["next"]["wake"].startswith("2026-11-13T06:15")
+    assert api.put("/api/sunrise/settings", json={"duration_min": 500}).status_code == 400
+    # tomorrow's day starts early -> visible in the phase bar of tomorrow, not today
+    assert api.services.sunrise.early_starts()
+
+
+def test_sunrise_cancel_and_test_conflicts(api):
+    assert api.post("/api/sunrise/cancel").status_code == 409
+    assert api.post("/api/sunrise/test").status_code == 200
+    assert api.post("/api/sunrise/test").status_code == 409
+    assert api.get("/api/sunrise").json()["test"] is True
+    assert api.post("/api/sunrise/cancel").status_code == 200
+    assert api.post("/api/sunrise/dismiss").status_code == 200
+
+
+def test_health_reports_sunrise_warning(api):
+    api.services.store.set("sunrise_warning", {"run": "x", "at": "now", "problems": ["p"]})
+    assert api.get("/health").json()["sunrise_warning"] is True

@@ -389,9 +389,13 @@ class SunriseService:
             )
             self.lights.locked.add(CEILING)
             expected[CEILING] = True
+        # A real run ends in the morning where the master colour is cold anyway.
+        # The test may run in the evening: show the morning look (coldest); the
+        # normal colour sync glides back to the current colour afterwards.
+        final_mired = MIRED_END if record.get("kind") == "test" else None
         try:
             for room in self.config.rooms:
-                await self.lights.apply_scene(room, "kalt", transition=T_FINAL, explicit=True)
+                await self.lights.apply_scene(room, "kalt", transition=T_FINAL, explicit=True, mired=final_mired)
                 for name, target in scene_targets(self.config, room, "kalt").items():
                     if name not in self.lights.locked:
                         expected[name] = target.on

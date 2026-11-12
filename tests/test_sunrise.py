@@ -396,11 +396,23 @@ async def test_test_mode_plays_compressed_sequence(rig):
     assert not rig.sunrise.start_test()  # one at a time
     await rig.clock.advance(20)
     assert rig.lamp("wzSchreibtischlampe").is_on
-    await rig.clock.advance(40)
+    await rig.clock.advance(31)
     assert all(rig.lights.room_is_on(r) for r in rig.cfg.rooms)
+    assert rig.lamp("kuecheDeckenlampe").color_temp == 153  # morning look, though it's 14:00 (master 0 anyway)
+    await rig.clock.advance(9)
     assert rig.store.get("sunrise_runs")["test"]["status"] == "done"
     assert rig.sunrise.early_starts() == {}  # a test never moves the day start
     assert rig.lights.locked == set()
+
+
+async def test_test_mode_in_evening_shows_cold_final_then_glides_back(rig):
+    rig.clock.set(at(21, 30, day=12))  # twilight, master colour warm (370)
+    await rig.start()
+    rig.sunrise.start_test()
+    await rig.clock.advance(52)
+    assert rig.lamp("badDeckenlampe").color_temp == 153  # final shows the morning colour
+    await rig.clock.advance(60)
+    assert rig.lamp("badDeckenlampe").color_temp == 370  # colour sync brings the evening back
 
 
 async def test_test_mode_ignores_already_lit_room(rig):
