@@ -1,0 +1,294 @@
+{
+  "_generated": "by tools/import_sheet.py from docs/devices.xlsx - do not edit by hand",
+  "scenes": [
+    {
+      "id": 0,
+      "key": "off",
+      "display_name": "Off",
+      "show_in_app": true,
+      "sort_order": 10
+    },
+    {
+      "id": 1,
+      "key": "kalt",
+      "display_name": "Kalt",
+      "show_in_app": true,
+      "sort_order": 20
+    },
+    {
+      "id": 2,
+      "key": "warm",
+      "display_name": "Warm",
+      "show_in_app": true,
+      "sort_order": 30
+    },
+    {
+      "id": 3,
+      "key": "night",
+      "display_name": "Night",
+      "show_in_app": true,
+      "sort_order": 40
+    },
+    {
+      "id": 4,
+      "key": "twilight",
+      "display_name": "Twilight",
+      "show_in_app": true,
+      "sort_order": 50
+    }
+  ],
+  "brightness": {
+    "wzBettlampe": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": true,
+        "pct": 37.0
+      },
+      "night": {
+        "on": true,
+        "pct": 5.1
+      }
+    },
+    "wzBodenstrips": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": true,
+        "pct": 45.7
+      },
+      "night": {
+        "on": true,
+        "pct": 3.9
+      }
+    },
+    "wzDeckenlampe": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": false,
+        "pct": null
+      },
+      "night": {
+        "on": false,
+        "pct": null
+      }
+    },
+    "wzSchreibtischlampe": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": true,
+        "pct": 48.4
+      },
+      "night": {
+        "on": true,
+        "pct": 3.9
+      }
+    },
+    "wzTowerlampe": {
+      "kalt": {
+        "on": false,
+        "pct": null
+      },
+      "warm": {
+        "on": true,
+        "pct": null
+      },
+      "twilight": {
+        "on": false,
+        "pct": null
+      },
+      "night": {
+        "on": false,
+        "pct": null
+      }
+    },
+    "wzLavalampe": {
+      "kalt": {
+        "on": false,
+        "pct": null
+      },
+      "warm": {
+        "on": true,
+        "pct": null
+      },
+      "twilight": {
+        "on": false,
+        "pct": null
+      },
+      "night": {
+        "on": false,
+        "pct": null
+      }
+    },
+    "kuecheDeckenlampe": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": false,
+        "pct": null
+      },
+      "night": {
+        "on": false,
+        "pct": null
+      }
+    },
+    "kuecheKuechenzeile": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": true,
+        "pct": 34.6
+      },
+      "night": {
+        "on": true,
+        "pct": 2.0
+      }
+    },
+    "kuecheTwintowers": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": true,
+        "pct": 60.2
+      },
+      "night": {
+        "on": true,
+        "pct": 1.2
+      }
+    },
+    "kuecheTischlampe": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": false,
+        "pct": null
+      },
+      "night": {
+        "on": true,
+        "pct": 100.0
+      }
+    },
+    "badDeckenlampe": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": false,
+        "pct": null
+      },
+      "night": {
+        "on": false,
+        "pct": null
+      }
+    },
+    "badSpiegellampe": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": true,
+        "pct": 53.5
+      },
+      "night": {
+        "on": true,
+        "pct": 17.7
+      }
+    },
+    "flurDeckenlampe": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": true,
+        "pct": 58.3
+      },
+      "night": {
+        "on": true,
+        "pct": 13.0
+      }
+    },
+    "flurDeckenstrip": {
+      "kalt": {
+        "on": true,
+        "pct": 100.0
+      },
+      "warm": {
+        "on": true,
+        "pct": 100.0
+      },
+      "twilight": {
+        "on": true,
+        "pct": 51.6
+      },
+      "night": {
+        "on": true,
+        "pct": 2.4
+      }
+    }
+  }
+}

@@ -30,9 +30,12 @@ pytest
 `docs/devices.xlsx` is the master. After editing it:
 
 ```bash
-python tools/import_sheet.py   # writes config/*.json (coming in M1)
+python tools/import_sheet.py           # validates, then writes config/*.json
+python tools/import_sheet.py --check   # validate only
 git add docs/devices.xlsx config/ && git commit
 ```
+
+Errors (sheet inconsistent with itself) stop the import; warnings (sheet vs. Zigbee2MQTT snapshot, lamp outside its room) are printed but the files are still written. A test fails if `config/` is stale, so a forgotten import is caught by `pytest`.
 
 ## Run
 

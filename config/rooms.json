@@ -1,0 +1,37 @@
+{
+  "_generated": "by tools/import_sheet.py from docs/devices.xlsx - do not edit by hand",
+  "rooms": [
+    {
+      "room": "Wohnzimmer",
+      "display_name": "Schlafzimmer",
+      "sort_order": 10,
+      "z2m_group": "Wohnzimmer",
+      "z2m_group_id": 4,
+      "svg_id": "schlafzimmer"
+    },
+    {
+      "room": "Küche",
+      "display_name": "Küche",
+      "sort_order": 20,
+      "z2m_group": "Küche",
+      "z2m_group_id": 3,
+      "svg_id": "kueche"
+    },
+    {
+      "room": "Bad",
+      "display_name": "Badezimmer",
+      "sort_order": 30,
+      "z2m_group": "Bad",
+      "z2m_group_id": 2,
+      "svg_id": "bad"
+    },
+    {
+      "room": "Flur",
+      "display_name": "Flur",
+      "sort_order": 40,
+      "z2m_group": "Flur",
+      "z2m_group_id": 1,
+      "svg_id": "flur"
+    }
+  ]
+}
