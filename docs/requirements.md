@@ -1,6 +1,6 @@
 # Requirements – Lamp remote (Kolja-Smarthome)
 
-Status: **draft, decisions agreed 2026-11-06.** Items marked *(default)* were proposed and accepted without discussion; items under "Open" are still missing.
+Status: **draft, decisions agreed 2026-11-06, clarified 2026-11-12** (planning Q&A, see §14). Items marked *(default)* were proposed and accepted without discussion; items under "Open" are still missing.
 
 ## 1. Goal
 
@@ -28,14 +28,13 @@ The new app is **its own container**. It only speaks MQTT; it never touches Zigb
 | File | Content | Owner |
 |---|---|---|
 | `docs/devices.xlsx` | Master sheet, edited by Kolja | Kolja |
-| `docs/devices.csv` | Export of sheet *Devices* | generated |
-| `docs/rooms.csv` | Export of sheet *Rooms* | generated |
-| `docs/scenes.csv` | Export of sheet *Scenes* | generated |
-| `docs/scene_brightness.csv` | Export of sheet *SceneBrightness* | generated |
+| `config/*.json` | Generated from `devices.xlsx` by `tools/import_sheet.py`, committed. The only config the running app reads | generated |
 | `docs/apartment-floorplan.svg` | Floor plan, 1 unit = 1 cm, room shapes have ids | Kolja |
 | `docs/z2m-snapshot.json` | Trimmed Z2M export: devices with capabilities (`exposes`), groups, scenes. Use as test fixture | generated |
 
-Live truth for capabilities and state is Zigbee2MQTT over MQTT (`zigbee2mqtt/bridge/devices`, `zigbee2mqtt/bridge/groups`, `zigbee2mqtt/<name>`). The CSVs add what Z2M does not know (room, display name, flags, positions, scene brightness).
+Live truth for capabilities and state is Zigbee2MQTT over MQTT (`zigbee2mqtt/bridge/devices`, `zigbee2mqtt/bridge/groups`, `zigbee2mqtt/<name>`). The config files add what Z2M does not know (room, display name, flags, positions, scene brightness).
+
+**Import step:** after editing the sheet, run `python tools/import_sheet.py`. It reads `docs/devices.xlsx` directly (no manual CSV export), validates it against `docs/z2m-snapshot.json` and writes `config/*.json`. Commit both the sheet and the generated files; the git diff of the JSON shows what changed. The import script is a dev tool and is not part of the container.
 
 ### Lamp positions (sheet *Devices*)
 
@@ -54,9 +53,11 @@ Coordinates in cm on `apartment-floorplan.svg` (1 SVG unit = 1 cm, origin top-le
 |---|---|---|---|
 | Wohnzimmer | 4 | `schlafzimmer` | **Shown as "Schlafzimmer" in the app.** Z2M group and device names (`wz…`) stay as they are |
 | Küche | 3 | `kueche` | |
-| Bad | 2 | `bad` | |
+| Bad | 2 | `bad` | Shown as "Badezimmer" (display names come from sheet *Rooms*) |
 | Flur | 1 | `flur` | |
 | `Alle_Lampen` | 5 | – | All lamps with `in_all_off = yes` |
+
+A room **is on** when at least one of its `in_app` lights (plugs included) is on.
 
 ## 4. Colour model
 
@@ -64,7 +65,7 @@ Coordinates in cm on `apartment-floorplan.svg` (1 SVG unit = 1 cm, origin top-le
 - **Common range for every lamp: 153–370 mired** (the range every model supports). Mapping: `mired = 153 + master_ct × (370 − 153)`, linear in mired. Hue lamps are deliberately not driven warmer than 370 so all lamps match.
 - On/off-only lamps (smart plugs) never receive colour or brightness.
 - Every command that turns a lamp on carries brightness **and** colour in the same message (no flash of an old colour).
-- Lamps that are already on follow `master_ct` while it changes: update about once a minute in small steps with a smooth transition *(default)*. Because the range is common, one command to group `Alle_Lampen` is acceptable for colour updates.
+- Lamps that are already on follow `master_ct` while it changes: update about once a minute in small steps with a smooth transition *(default)*. Colour updates are sent **per lamp**, only to colour-capable lamps that are on and not locked by a running sunrise. Never to group `Alle_Lampen`: it contains the plugs `wzTowerlampe` and `wzLavalampe`.
 - If any lamp turns on by a route outside the app (Z2M UI, power restored), the app sets it to `master_ct` immediately; its brightness is left alone *(default)*.
 - Scene colour values are always overridden by `master_ct`.
 
@@ -89,10 +90,11 @@ Four phases, each with one scene. Scene names are the same in every group (Z2M i
 - Sun position is computed locally (no internet) for Köln (≈ 50.94 N, 6.96 E), location editable. Time zone Europe/Berlin incl. DST.
 - **Scenes are owned by the app**, defined in `scene_brightness.csv` (per lamp: brightness 1–100 % or off; plugs on/off). Do **not** use Zigbee `scene_recall`: Z2M does not expose stored scene brightness over MQTT, and recall would flash the scene's own colour.
 - **At a phase change, rooms that are on fade automatically to the new phase scene**; the room's dim factor resets to 1. Rooms that are off stay off.
+- The new scene is applied **fully**, including on/off per lamp: a lamp whose new value is `off` turns off, and a lamp that is off but has a value in the new scene turns on. Example: warm → twilight turns off `wzDeckenlampe` and `wzTowerlampe`; twilight → night turns on `kuecheTischlampe` (100 %, intended) in a lit Küche. A room never switches on or off *as a whole* at a phase change.
 
 ### Manual "next phase"
 
-- A button in the app moves the day phase one step forward **now**: kalt → warm → twilight → night. It behaves exactly like an automatic phase change: rooms that are on fade to the new scene, **no lamp changes its on/off state**, wall switches use the new phase from then on.
+- A button in the app moves the day phase one step forward **now**: kalt → warm → twilight → night. It behaves exactly like an automatic phase change: rooms that are on fade to the new scene (applied fully, see above), **no room switches on or off as a whole**, wall switches use the new phase from then on.
 - In phase **night** the button does nothing (disabled).
 - Colour changes to the new phase's colour within a few seconds (no 60-min ramp). A manual colour override from the master slider ends.
 - **The schedule never steps backwards:** after a manual advance, the schedule takes over again at its next boundary that leads to a *later* phase, or at the start of `kalt` the next morning. Example: advanced to night at 20:00 → the scheduled twilight at 21:00 is skipped, the day restarts with kalt at 07:00.
@@ -114,16 +116,20 @@ Only these four switches are in scope. Only the press matters (duration irreleva
 
 | Button | Action |
 |---|---|
-| Top (`on_press`) | Room off → turn on with the **current phase scene**, `f = 1`. Room already on → restore the scene's original brightness (`f = 1`). |
+| Top (`on_press`) | Room off → turn on with the **current phase scene**, `f = 1`. Room already on → **re-apply the current phase scene fully** (lamps on/off and brightness exactly as the scene says, `f = 1`). |
 | Up (`up_press`) | Dim factor up (see 6) |
 | Down (`down_press`) | Dim factor down (see 6) |
 | Bottom (`off_press`) | Turn off all lamps of the room with `in_room_off = yes` |
 
-**Flur exception (`flurLichtschalter`):** the press acts immediately as above. If the top button is still held **1.5 s after the press**, trigger **all on** (= top-press logic in every room). Same for the bottom button → **all off**. Time the 1.5 s from the press event; never infer it from a missing release event.
+**Flur exception (`flurLichtschalter`):** the press acts immediately as above. If the top button is still held **1.5 s after the press**, trigger **all on** (= top-press logic in every room). Same for the bottom button → **all off**. Time the 1.5 s from the press event; never infer it from a missing release event. Implementation: 1.5 s after `on_press`/`off_press`, the hold fires if an `on_hold`/`off_hold` for that button arrived after the press **and** no `*_release` for it has arrived since. A lost release message therefore cannot fake a hold.
 
 **All off:** switch off group `Alle_Lampen`, check states after ~2 s, and resend individually to any lamp still on (group commands are unacknowledged).
 
 **Coexistence with the old hub:** button handling must be switchable (e.g. `BUTTONS_ENABLED`), **default off** until switch-over day, so the old `smarthome_hub` and the new app never both react to a press.
+
+### Kettle button (kept from the old hub)
+
+`kuecheButton` press → `kuecheWasserkocher` on, switched off again after **180 s**. The timer is persisted so a restart still switches the kettle off. Behind `BUTTONS_ENABLED` like the wall switches. No other control of the kettle plug.
 
 ## 7a. Sunrise wake-up
 
@@ -159,7 +165,7 @@ If the wake-up time is earlier than the start of phase `kalt`, the day starts at
 
 ### Fallback: Schlafzimmer already lit
 
-If **any** Schlafzimmer lamp is on when the animation would start, there is no animation. Instead, at the wake-up time:
+If **any** Schlafzimmer lamp (plugs `wzTowerlampe`/`wzLavalampe` included) is on when the animation would start, there is no animation. Instead, at the wake-up time:
 
 1. `wzDeckenlampe` is set to 100 % brightness and coldest colour. The command is **always sent**, even if the lamp is already on in that state.
 2. Scene `kalt` is applied in every room (= `alle_kalt`), exactly as at the end of the normal animation. `wzDeckenlampe` stays at 100 % even if the kalt scene defines a lower value.
@@ -167,6 +173,7 @@ If **any** Schlafzimmer lamp is on when the animation would start, there is no a
 ### No interference
 
 - **No wall switch, dial or button can change or stop a running sunrise.** During the animation, presses on `wzLichtschalter` are ignored; "all on"/"all off" from the Flur switch leave the three animated lamps alone. Other rooms work normally.
+- Implementation: while the animation runs, its three lamps are **locked**. Phase changes, colour updates, "all on"/"all off" and the "turned on outside the app" correction skip locked lamps; "all off" is then sent per lamp instead of to group `Alle_Lampen`.
 - The app shows the three lamps as "Sonnenaufgang läuft" and offers exactly one action: **cancel**. Cancelling stops today's animation and the final `alle_kalt`; lamps stay as they are. The toggle stays on, so it runs again the next day.
 
 ### Reliability
@@ -183,7 +190,7 @@ Three tabs:
 
 | Left: Plugs | Middle: Floor plan (start screen) | Right: Settings |
 |---|---|---|
-| Non-lamp plugs (`pveSwitch`, `kuecheWasserkocher`): live power, read-only, no switching *(default)*. Tap → pop-up chart of power history | `apartment-floorplan.svg` with lamp markers at `pos_x_cm`/`pos_y_cm`, showing on/off and brightness. Tap lamp → on/off, brightness. Tap room → room on/off, dim, scene. Master colour slider and "Alles aus" | Phase times, sun toggle, colour ramp durations, location, back-to-automatic, sunrise wake-up (toggle "Sonnenaufgang", time, duration, "Test") |
+| Non-lamp plugs (`pveSwitch`, `kuecheWasserkocher`): live power, read-only, no switching *(default)*. `pveSwitch` is only ever read; publishing to it is blocked in code. Tap → pop-up chart of power history | `apartment-floorplan.svg` with lamp markers at `pos_x_cm`/`pos_y_cm`, showing on/off and brightness. Tap lamp → on/off, brightness. Tap room → room on/off, dim, scene. Master colour slider and "Alles aus" | Phase times, sun toggle, colour ramp durations, location, back-to-automatic, sunrise wake-up (toggle "Sonnenaufgang", time, duration, "Test") |
 
 - **UI language: German.** Code, comments and docs in English.
 - Optimised for phone portrait; works on desktop too.
@@ -229,7 +236,7 @@ A rough visual impression of the light in the apartment, updated live from lamp 
 
 ## 11. Out of scope (for now)
 
-Hue tap dial switches, Hue smart buttons (incl. kettle button and kettle timer), fingerbot, switching `pveSwitch`, colour per lamp, drag-and-drop lamp positioning (later), migrating code from `smarthome_hub` (start fresh).
+Hue tap dial switches, Hue smart button `wzTowerbutton` (the kettle button `kuecheButton` **is** in scope, see §7), fingerbot, switching `pveSwitch`, colour per lamp, drag-and-drop lamp positioning (later), migrating code from `smarthome_hub` (start fresh).
 
 ## 12. Stack and deployment *(default, Claude Code proposes details in plan mode)*
 
@@ -237,6 +244,8 @@ Hue tap dial switches, Hue smart buttons (incl. kettle button and kettle timer),
 - Storage: SQLite.
 - Frontend: lightweight PWA rendering the SVG floor plan.
 - One container, built on the Pi (ARM64) from the git repo; deploy = `git pull` + `docker compose up -d --build`.
+- Confirmed 2026-11-12: Python 3.12, FastAPI/uvicorn, `aiomqtt`, `astral` (local sun times), stdlib `sqlite3`; frontend vanilla JS + SVG without build step; live updates via Server-Sent Events.
+- HTTPS: the app serves plain HTTP on port 8000; Tailscale (already on Pi and phone) publishes it with a real certificate via `tailscale serve` at `https://<pi>.<tailnet>.ts.net`, so the PWA can be installed.
 
 ## 13. Open
 
@@ -247,3 +256,16 @@ Hue tap dial switches, Hue smart buttons (incl. kettle button and kettle timer),
 - [ ] Pi IP address, fixed via DHCP reservation?
 - [x] Verified: VM reaches the broker on port 1883
 - [x] `CLAUDE.md`
+
+## 14. Clarifications 2026-11-12 (planning Q&A)
+
+| Question | Decision |
+|---|---|
+| Phase change vs. "no lamp changes its on/off state" | Scene applied fully in rooms that are on; no room switches on/off as a whole (§5) |
+| Top press in a room that is already on | Full scene re-apply incl. on/off (§7) |
+| Colour to group `Alle_Lampen` | No: per lamp, only lamps that are on (§4) |
+| Kettle button after switch-over | Kept: 180 s timer behind `BUTTONS_ENABLED` (§7) |
+| HTTPS for the PWA | Tailscale `serve` (§12) |
+| `pveSwitch` | Power read and recorded, never commanded (§8, §9) |
+| `kuecheTischlampe` 100 % in night | Intended |
+| Excel → app | Import script reading the xlsx directly, output `config/*.json` (§3) |
