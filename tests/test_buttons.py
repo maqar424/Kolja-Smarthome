@@ -209,14 +209,21 @@ async def test_kettle_on_then_off_after_180_s(rig):
     assert rig.store.get("kettle_off_at") is None
 
 
-async def test_kettle_new_press_restarts_timer(rig):
+async def test_kettle_second_press_switches_off(rig):
+    """Decision 2026-11-12: a press while the kettle runs stops it."""
     await rig.press("kuecheButton", "press")
-    await rig.settle(100)
-    await rig.press("kuecheButton", "press")
-    await rig.settle(179)
+    await rig.press("kuecheButton", "release")
+    await rig.press("kuecheButton", "on")
+    await rig.settle(5)  # the live sequence for one press, seen on the real button
     assert rig.lamp("kuecheWasserkocher").is_on
-    await rig.settle(2)
+    await rig.press("kuecheButton", "press")
+    await rig.press("kuecheButton", "off")
     assert not rig.lamp("kuecheWasserkocher").is_on
+    assert rig.store.get("kettle_off_at") is None
+    await rig.settle(200)  # cancelled timer sends nothing more
+    assert rig.z2m.to("kuecheWasserkocher") == [{"state": "ON"}, {"state": "OFF"}]
+    await rig.press("kuecheButton", "press")  # and a later press starts it again
+    assert rig.lamp("kuecheWasserkocher").is_on
 
 
 async def test_kettle_timer_survives_restart(rig):

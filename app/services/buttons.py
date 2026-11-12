@@ -15,8 +15,10 @@ press and no *_release since. If neither has arrived yet, we wait up to 0.5 s
 longer for a late hold message (Zigbee latency). A missing release alone is
 never taken as "still held".
 
-Kettle: kuecheButton press -> kuecheWasserkocher on, off after 180 s. The
-off time is persisted. Once started, the timer always completes (safety),
+Kettle: kuecheButton press -> kuecheWasserkocher on, off after 180 s; a press
+while it runs switches it off at once (toggle). One physical press sends
+press, release and on/off (alternating), so presses within 3 s count once.
+The off time is persisted. Once started, the timer always completes (safety),
 even if buttons are disabled in between.
 """
 
@@ -192,6 +194,14 @@ class ButtonService:
         if event.at - self._kettle_last_press < KETTLE_DEBOUNCE_S:
             return  # one physical press sends several messages
         self._kettle_last_press = event.at
+        if self.store.get("kettle_off_at"):
+            # Second press while running: stop early (decision 2026-11-12).
+            log.info("Kettle button: kettle running -> off now")
+            if self._kettle_task:
+                self._kettle_task.cancel()
+                self._kettle_task = None
+            await self._kettle_off()
+            return
         off_at = self.clock.now() + timedelta(seconds=KETTLE_ON_S)
         log.info("Kettle button: kettle on until %s", off_at.strftime("%H:%M:%S"))
         self.store.set("kettle_off_at", off_at.astimezone(timezone.utc).isoformat())
@@ -200,12 +210,15 @@ class ButtonService:
 
     def _start_kettle_timer(self, off_at: datetime) -> None:
         if self._kettle_task:
-            self._kettle_task.cancel()  # a new press restarts the 180 s
+            self._kettle_task.cancel()
         self._kettle_task = self._spawn(self._kettle_timer(off_at))
 
     async def _kettle_timer(self, off_at: datetime) -> None:
         await self.clock.sleep_until(off_at)
         log.info("Kettle timer done: kettle off")
+        await self._kettle_off()
+
+    async def _kettle_off(self) -> None:
         # Retry until the command is out (e.g. MQTT still reconnecting after a restart).
         while not await self.publisher.send(KETTLE_PLUG, {"state": "OFF"}):
             log.warning("Kettle off not sent yet - retrying in 5 s")

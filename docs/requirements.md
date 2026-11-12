@@ -129,7 +129,9 @@ Only these four switches are in scope. Only the press matters (duration irreleva
 
 ### Kettle button (kept from the old hub)
 
-`kuecheButton` press → `kuecheWasserkocher` on, switched off again after **180 s**. The timer is persisted so a restart still switches the kettle off. Behind `BUTTONS_ENABLED` like the wall switches. No other control of the kettle plug.
+`kuecheButton` press → `kuecheWasserkocher` on, switched off again after **180 s**. A press while the kettle is running switches it **off immediately**. The timer is persisted so a restart still switches the kettle off. Behind `BUTTONS_ENABLED` like the wall switches. No other control of the kettle plug.
+
+One physical press sends `press`, `release` and `on`/`off` (alternating per press, measured 2026-11-12), so messages within 3 s count as one press. The old hub apparently reacted to only one of `on`/`off`, which is why it needed two presses; the app reacts to every press.
 
 ## 7a. Sunrise wake-up
 
@@ -264,7 +266,8 @@ Hue tap dial switches, Hue smart button `wzTowerbutton` (the kettle button `kuec
 | Phase change vs. "no lamp changes its on/off state" | Scene applied fully in rooms that are on; no room switches on/off as a whole (§5) |
 | Top press in a room that is already on | Full scene re-apply incl. on/off (§7) |
 | Colour to group `Alle_Lampen` | No: per lamp, only lamps that are on (§4) |
-| Kettle button after switch-over | Kept: 180 s timer behind `BUTTONS_ENABLED` (§7) |
+| Kettle button after switch-over | Kept: 180 s timer behind `BUTTONS_ENABLED`; second press while running = off (§7) |
+| Flur hold timing | Measured: first `on_hold` 0.79 s after the press, then every ~0.8 s; short tap releases after ~0.3 s |
 | HTTPS for the PWA | Tailscale `serve` (§12) |
 | `pveSwitch` | Power read and recorded, never commanded (§8, §9) |
 | `kuecheTischlampe` 100 % in night | Intended |
