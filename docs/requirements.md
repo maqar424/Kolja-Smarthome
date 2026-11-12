@@ -157,7 +157,7 @@ Lamps: `wzBodenstrips`, `wzSchreibtischlampe`, `wzDeckenlampe`. Animation time `
 
 - "0 %" means the lowest brightness at which the lamp is on (Z2M brightness 1), never off.
 - Brightness follows a **perceptually even curve** (not linear in Z2M values), so the dark start does not look like a jump.
-- **Colour:** one shared ramp for all three lamps from warmest to coldest of the common range (370 → 153 mired) over t = 0 … 1. During the animation this overrides `master_ct`.
+- **Colour:** one shared ramp for all three lamps from warmest to coldest of the common range (370 → 153 mired) over t = 0 … 1. During the animation this overrides `master_ct`. The ramp follows the same perceptual curve as the brightness, so it **stays warm while it is dim** (~3000 K at half time, ~3500 K at 2/3) and turns cold only near the end (decided 2026-11-12 after the first live test looked "only white"; the strips cannot go warmer than 2700 K).
 - Updates in small steps every few seconds with Zigbee transitions, so no stepping is visible.
 - **At t = 1:** apply scene `kalt` in every room (= `alle_kalt`), fading in over a few seconds. Brightness comes from the scene grid, so the three animated lamps may change level or turn off at that moment if the kalt scene says so.
 

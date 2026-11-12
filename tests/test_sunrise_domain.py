@@ -49,9 +49,12 @@ def test_never_off_once_on():
             assert b is None or 1 <= b <= 254
 
 
-def test_colour_ramp():
-    assert mired_at(0) == 370 and mired_at(1) == 153
-    assert mired_at(0.5) == 262 and mired_at(2) == 153
+def test_colour_ramp_stays_warm_while_dim():
+    assert mired_at(0) == 370 and mired_at(1) == 153 and mired_at(2) == 153
+    assert mired_at(0.5) >= 325  # ~3000 K at half time (linear would be 262)
+    assert mired_at(2 / 3) >= 280  # still warm when the ceiling lamp comes on
+    values = [mired_at(i / 100) for i in range(101)]
+    assert values == sorted(values, reverse=True)  # only ever colder
 
 
 def test_occurrence_and_t():

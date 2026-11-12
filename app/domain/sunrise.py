@@ -8,7 +8,8 @@ Animation time t runs from 0 (start) to 1 (wake-up time).
 
 "0 %" is Z2M brightness 1 (on, lowest), never off. Brightness follows a
 perceptual curve: equal steps in *perceived* lightness (CIE L*), so the dark
-start does not look like a jump. Colour: one shared ramp 370 -> 153 mired.
+start does not look like a jump. Colour: one shared ramp 370 -> 153 mired
+along the same curve, so it stays warm while dim (see mired_at).
 """
 
 from __future__ import annotations
@@ -78,8 +79,14 @@ def lamp_brightness(t: float, start: float) -> int | None:
 
 
 def mired_at(t: float) -> int:
+    """Shared colour: stays warm while it is dim, turns cold as it gets bright.
+
+    Follows the same perceptual curve as the brightness (decision 2026-11-12,
+    after the first live test looked "only white"): ~3000 K at half time,
+    ~3500 K at 2/3, cold daylight only at the very end.
+    """
     t = max(0.0, min(1.0, t))
-    return round(MIRED_START + (MIRED_END - MIRED_START) * t)
+    return round(MIRED_START + (MIRED_END - MIRED_START) * perceptual(t))
 
 
 def frame(t: float) -> dict[str, int | None]:
