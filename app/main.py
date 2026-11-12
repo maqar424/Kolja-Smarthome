@@ -10,16 +10,19 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import json
 import logging
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api import build_router
 from app.clock import Clock, RealClock
-from app.config import AppConfig, Settings
+from app.config import REPO_ROOT, AppConfig, Settings
+from app.events import Changes
 from app.mqtt.client import MqttClient
 from app.mqtt.publisher import Publisher
 from app.services.buttons import ButtonService
@@ -32,6 +35,9 @@ from app.store import Store
 from app.sysclock import clock_synchronised
 
 log = logging.getLogger("app")
+
+STATIC_DIR = REPO_ROOT / "static"
+FLOORPLAN = REPO_ROOT / "docs" / "apartment-floorplan.svg"
 
 
 @dataclass
@@ -48,6 +54,7 @@ class Services:
     scheduler: Scheduler
     buttons: ButtonService
     sunrise: SunriseService
+    changes: Changes
 
 
 def build_services(
@@ -86,8 +93,10 @@ def build_services(
         config, state, lights, publisher, store, clock,
         enabled=settings.buttons_enabled, room_blocked=sunrise.room_blocked,
     )
+    changes = Changes()
+    state.subscribe(changes.poke)  # every lamp update reaches the open browsers
     return Services(
-        settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler, buttons, sunrise
+        settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler, buttons, sunrise, changes
     )
 
 
@@ -110,7 +119,57 @@ def create_app(services: Services) -> FastAPI:
 
     app = FastAPI(title="Kolja-Smarthome", lifespan=lifespan)
     app.state.services = services
-    app.include_router(build_router(services))
+    router = build_router(services)
+    app.include_router(router)
+
+    @app.middleware("http")
+    async def poke_after_actions(request: Request, call_next):
+        response = await call_next(request)
+        if request.method != "GET" and request.url.path.startswith("/api/"):
+            services.changes.poke()  # settings/phase/sunrise changes without a lamp change
+        return response
+
+    @app.get("/events")
+    async def events(request: Request):
+        """Live snapshots for the UI: on every change, at least every 10 s."""
+
+        async def stream():
+            wake = services.changes.listen()
+            try:
+                while not await request.is_disconnected():
+                    data = json.dumps(router.snapshot(), ensure_ascii=False, default=str)
+                    yield f"data: {data}\n\n"
+                    wake.clear()
+                    with contextlib.suppress(TimeoutError):
+                        await asyncio.wait_for(wake.wait(), 10)
+                    await asyncio.sleep(0.15)  # coalesce bursts (a scene = several lamp updates)
+            finally:
+                services.changes.unlisten(wake)
+
+        return StreamingResponse(
+            stream(), media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
+    # ---- PWA shell
+    @app.get("/", include_in_schema=False)
+    async def index():
+        return FileResponse(STATIC_DIR / "index.html", headers={"Cache-Control": "no-cache"})
+
+    @app.get("/sw.js", include_in_schema=False)
+    async def service_worker():
+        # served from the root so its scope covers the whole app
+        return FileResponse(STATIC_DIR / "sw.js", media_type="text/javascript", headers={"Cache-Control": "no-cache"})
+
+    @app.get("/manifest.webmanifest", include_in_schema=False)
+    async def manifest():
+        return FileResponse(STATIC_DIR / "manifest.webmanifest", media_type="application/manifest+json")
+
+    @app.get("/floorplan.svg", include_in_schema=False)
+    async def floorplan():
+        return FileResponse(FLOORPLAN, media_type="image/svg+xml")
+
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
     @app.get("/health")
     async def health():
@@ -133,36 +192,6 @@ def create_app(services: Services) -> FastAPI:
             "time": services.clock.now().isoformat(timespec="seconds"),
         }
         return JSONResponse(body, status_code=200 if body["status"] == "ok" else 503)
-
-    @app.get("/api/state")
-    async def api_state():
-        cfg = services.config
-        return {
-            "rooms": [
-                {
-                    "room": r.room,
-                    "display_name": r.display_name,
-                    "svg_id": r.svg_id,
-                    "lamps": [d.friendly_name for d in cfg.lamps(r.room)],
-                    "on": bool(services.state.lamps_on(r.room)),
-                    **services.store.room_light(r.room).to_dict(),
-                }
-                for r in cfg.rooms.values()
-            ],
-            "devices": {
-                d.friendly_name: {
-                    "display_name": d.display_name,
-                    "room": d.room,
-                    "dimmable": d.dimmable,
-                    "has_colour": d.has_colour,
-                    "has_power": d.has_power,
-                    "locked": d.friendly_name in services.lights.locked,
-                    **services.state.get(d.friendly_name).snapshot(),
-                }
-                for d in cfg.devices.values()
-                if d.is_lamp or d.has_power
-            },
-        }
 
     @app.get("/api/debug/commands")
     async def recent_commands():

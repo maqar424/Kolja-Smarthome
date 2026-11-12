@@ -124,3 +124,49 @@ def test_sunrise_cancel_and_test_conflicts(api):
 def test_health_reports_sunrise_warning(api):
     api.services.store.set("sunrise_warning", {"run": "x", "at": "now", "problems": ["p"]})
     assert api.get("/health").json()["sunrise_warning"] is True
+
+
+# --------------------------------------------------------------------------- PWA support
+
+
+def test_config_for_ui(api):
+    body = api.get("/api/config").json()
+    lamps = {l["name"]: l for l in body["lamps"]}
+    assert lamps["wzBodenstrips"]["shape"] == "line" and len(lamps["wzBodenstrips"]["geometry"]) == 2
+    assert lamps["wzTowerlampe"]["dimmable"] is False
+    assert "pveSwitch" not in lamps
+    plugs = {p["name"]: p for p in body["plugs"]}
+    assert plugs["pveSwitch"]["is_lamp"] is False and plugs["wzLavalampe"]["is_lamp"] is True
+    assert [s["key"] for s in body["scenes"]] == ["kalt", "warm", "night", "twilight"]  # sheet order; UI sorts by day
+    assert {r["svg_id"] for r in body["rooms"]} == {"schlafzimmer", "kueche", "bad", "flur"}
+
+
+def test_snapshot_has_everything_the_ui_renders(api):
+    body = api.get("/api/snapshot").json()
+    assert set(body) == {"state", "schedule", "sunrise", "system"}
+    assert body["system"]["dry_run"] is False
+    assert body["schedule"]["phase"] == "kalt"
+
+
+def test_actions_poke_live_stream(api):
+    wake = api.services.changes.listen()
+    api.get("/api/schedule")
+    assert not wake.is_set()  # reads don't
+    api.post("/api/colour", json={"master_ct": 0.3})
+    assert wake.is_set()
+
+
+def test_lamp_state_change_pokes_live_stream(api):
+    wake = api.services.changes.listen()
+    api.services.state.handle_message("zigbee2mqtt/flurDeckenstrip", '{"state":"ON"}')
+    assert wake.is_set()
+
+
+@pytest.mark.parametrize(
+    "path,kind",
+    [("/", "text/html"), ("/sw.js", "javascript"), ("/manifest.webmanifest", "manifest+json"),
+     ("/floorplan.svg", "image/svg+xml"), ("/static/app.js", "javascript"), ("/static/icon-192.png", "image/png")],
+)
+def test_pwa_files_served(api, path, kind):
+    r = api.get(path)
+    assert r.status_code == 200 and kind in r.headers["content-type"]

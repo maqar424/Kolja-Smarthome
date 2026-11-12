@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101317">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Licht</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header id="topbar">
+    <div id="phase-wrap">
+      <div id="phase-bar" aria-label="Tagesphasen heute"></div>
+      <div id="phase-text">&nbsp;</div>
+    </div>
+    <button id="next-phase" title="Nächste Phase jetzt starten">Nächste ⏭</button>
+  </header>
+
+  <div id="banners"></div>
+
+  <main>
+    <section id="tab-plugs" class="tab">
+      <div class="page" id="plugs-page"></div>
+    </section>
+
+    <section id="tab-plan" class="tab active">
+      <div id="plan"></div>
+      <div id="plan-controls">
+        <div class="colour-row">
+          <label for="colour">Farbe</label>
+          <input id="colour" type="range" min="0" max="1" step="0.01" value="0" aria-label="Lichtfarbe (kalt bis warm)">
+          <button id="colour-mode" title="Farbe automatisch nach Tagesphase">Auto</button>
+        </div>
+        <div class="actions-row">
+          <button id="all-off" class="danger">Alles aus</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-settings" class="tab">
+      <div class="page" id="settings-page"></div>
+    </section>
+  </main>
+
+  <nav id="tabs">
+    <button data-tab="plugs"><span class="ico">🔌</span>Steckdosen</button>
+    <button data-tab="plan" class="active"><span class="ico">💡</span>Grundriss</button>
+    <button data-tab="settings"><span class="ico">⚙️</span>Einstellungen</button>
+  </nav>
+
+  <div id="sheet-backdrop"></div>
+  <div id="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheet-body"></div></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

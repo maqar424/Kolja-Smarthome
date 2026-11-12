@@ -44,10 +44,99 @@ def build_router(services: "Services") -> APIRouter:
             raise HTTPException(404, f"Unbekannter Raum: {room}")
         return room
 
+    # ------------------------------------------------------------------ payloads (shared by endpoints and /events)
+
+    def state_payload() -> dict:
+        return {
+            "rooms": [
+                {
+                    "room": r.room,
+                    "display_name": r.display_name,
+                    "svg_id": r.svg_id,
+                    "lamps": [d.friendly_name for d in cfg.lamps(r.room)],
+                    "on": bool(services.state.lamps_on(r.room)),
+                    **services.store.room_light(r.room).to_dict(),
+                }
+                for r in cfg.rooms.values()
+            ],
+            "devices": {
+                d.friendly_name: {
+                    "display_name": d.display_name,
+                    "room": d.room,
+                    "dimmable": d.dimmable,
+                    "has_colour": d.has_colour,
+                    "has_power": d.has_power,
+                    "locked": d.friendly_name in services.lights.locked,
+                    **services.state.get(d.friendly_name).snapshot(),
+                }
+                for d in cfg.devices.values()
+                if d.is_lamp or d.has_power
+            },
+        }
+
+    def system_payload() -> dict:
+        mqtt = services.mqtt
+        return {
+            "dry_run": services.settings.dry_run,
+            "buttons_enabled": services.settings.buttons_enabled,
+            "mqtt_connected": bool(mqtt and mqtt.connected),
+            "z2m_online": services.state.bridge_online is True,
+        }
+
+    def snapshot() -> dict:
+        return {
+            "state": state_payload(),
+            "schedule": schedule_payload(),
+            "sunrise": services.sunrise.status(),
+            "system": system_payload(),
+        }
+
+    router.snapshot = snapshot  # used by the /events stream in main.py
+
+    @router.get("/state")
+    async def api_state():
+        return state_payload()
+
+    @router.get("/snapshot")
+    async def api_snapshot():
+        return snapshot()
+
+    @router.get("/config")
+    async def api_config():
+        """Static description for the UI: rooms, lamps with shape/position, scenes."""
+        return {
+            "rooms": [
+                {"room": r.room, "display_name": r.display_name, "svg_id": r.svg_id}
+                for r in cfg.rooms.values()
+            ],
+            "lamps": [
+                {
+                    "name": d.friendly_name,
+                    "display_name": d.display_name,
+                    "room": d.room,
+                    "dimmable": d.dimmable,
+                    "has_colour": d.has_colour,
+                    "shape": d.shape,
+                    "geometry": d.geometry,
+                    "mount": d.mount,
+                    "height_cm": d.height_cm,
+                }
+                for d in cfg.lamps()
+            ],
+            "plugs": [
+                {"name": d.friendly_name, "display_name": d.display_name, "room": d.room, "is_lamp": d.is_lamp}
+                for d in cfg.power_devices()
+            ],
+            "scenes": [
+                {"key": s.key, "display_name": s.display_name}
+                for s in sorted(cfg.scenes.values(), key=lambda s: s.sort_order)
+                if s.show_in_app and s.key != "off"
+            ],
+        }
+
     # ------------------------------------------------------------------ schedule / colour
 
-    @router.get("/schedule")
-    async def get_schedule():
+    def schedule_payload() -> dict:
         now = services.clock.now()
         timeline = schedule.timeline(now)
         colour = schedule.colour(now, timeline)
@@ -71,6 +160,10 @@ def build_router(services: "Services") -> APIRouter:
             },
             "settings": schedule.settings.to_dict(),
         }
+
+    @router.get("/schedule")
+    async def get_schedule():
+        return schedule_payload()
 
     @router.post("/schedule/next")
     async def next_phase():
