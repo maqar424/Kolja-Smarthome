@@ -5,7 +5,7 @@ Self-hosted PWA and automation service for the Zigbee lamps in Kolja's apartment
 - Spec: [`docs/requirements.md`](docs/requirements.md)
 - Rules for working on this repo: [`CLAUDE.md`](CLAUDE.md)
 
-> Status: milestone M4 done. Live lamp state, day phases (manual + sun mode), global colour with ramps, scenes, dimming, all on/off, wall switches incl. Flur hold and kettle button (only with `BUTTONS_ENABLED=true`), sunrise wake-up incl. test run, all via an HTTP API. No UI yet (M5).
+> Status: milestone M5 done. Everything up to the sunrise wake-up, plus the phone app (floor plan, phase bar, colour, settings, live plug power). Next: power history (M6), lighting rendering (M7), deployment (M8).
 
 ## Setup (dev VM)
 
@@ -46,8 +46,13 @@ Errors (sheet inconsistent with itself) stop the import; warnings (sheet vs. Zig
 
 ```bash
 source .venv/bin/activate
-uvicorn app.main:create_default_app --factory --port 8000
+uvicorn app.main:create_default_app --factory --port 8000                  # this machine only
+uvicorn app.main:create_default_app --factory --host 0.0.0.0 --port 8000   # reachable from the phone
 ```
+
+Open http://localhost:8000 (or `http://<vm-name>:8000` from the phone via Tailscale). Installing as an app ("Zum Startbildschirm hinzufügen" with offline shell) needs HTTPS: on the Pi via `tailscale serve` (M8).
+
+UI checks without a phone: the app can be screenshotted at phone size with headless Firefox through geckodriver (WebDriver over HTTP, no extra Python packages).
 
 - http://localhost:8000/health – MQTT, Zigbee2MQTT and clock status (HTTP 503 while degraded)
 - http://localhost:8000/api/state – rooms and live lamp/plug state
