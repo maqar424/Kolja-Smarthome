@@ -68,13 +68,31 @@ async def test_dim_down_and_up_keeps_ratios(rig):
     assert rig.z2m.to("wzTowerlampe") == []  # plug ignores dimming (and is off in twilight)
 
 
-async def test_dim_up_stops_at_100_percent(rig):
+async def test_dim_up_reaches_full_brightness_for_every_lamp(rig):
+    """Decision 2026-11-13: the wall switch covers the full range of the lamps."""
     rig.clock.set(at(21, 30))
     await rig.lights.room_on("Wohnzimmer")
     while await rig.lights.dim("Wohnzimmer", "up"):
         pass
-    assert rig.lamp("wzSchreibtischlampe").brightness == 254  # the brightest one (48.4 %)
-    assert rig.lamp("wzBettlampe").brightness < 254
+    for name in ("wzSchreibtischlampe", "wzBettlampe", "wzBodenstrips"):
+        assert rig.lamp(name).brightness == 254, name
+
+
+async def test_dim_down_reaches_minimum_for_every_lamp_and_back(rig):
+    rig.clock.set(at(21, 30))
+    await rig.lights.room_on("Wohnzimmer")
+    scene = {n: rig.lamp(n).brightness for n in ("wzSchreibtischlampe", "wzBettlampe")}
+    presses = 0
+    while await rig.lights.dim("Wohnzimmer", "down"):
+        presses += 1
+    assert rig.lamp("wzSchreibtischlampe").brightness == 1  # the brightest one, too
+    assert rig.lamp("wzBettlampe").brightness == 1 and rig.lamp("wzBettlampe").is_on
+    assert presses > 20
+    # going up again un-squeezes: the scene's ratio between the lamps comes back
+    for _ in range(presses):
+        await rig.lights.dim("Wohnzimmer", "up")
+    a, b = (rig.lamp(n).brightness for n in scene)
+    assert a / b == pytest.approx(scene["wzSchreibtischlampe"] / scene["wzBettlampe"], rel=0.05)
 
 
 async def test_dim_room_with_nothing_on(rig):

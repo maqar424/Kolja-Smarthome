@@ -48,19 +48,18 @@ def test_level_bounds():
 # --------------------------------------------------------------------------- dimming
 
 
-def test_dim_up_stops_exactly_at_100_percent():
-    bases = [pct_to_level(50), pct_to_level(100) / 2]  # both 127
+def test_dim_up_until_every_lamp_is_at_100_percent():
+    bases = [pct_to_level(25), pct_to_level(50)]  # 63.5 and 127
     f = 1.0
-    steps = 0
     while (new := next_factor(bases, f, "up")) is not None:
-        f, steps = new, steps + 1
-    assert level(max(bases), f) == 254
-    assert steps == 5  # 1.15^4 = 1.75 < 2, 5th step capped at 2.0
-    assert f == pytest.approx(2.0)
+        f = new
+    assert [level(b, f) for b in bases] == [254, 254]  # the brighter one waited at 100 %
+    assert f == pytest.approx(4.0)  # capped exactly where the dimmest lamp reaches 100 %
 
 
 def test_dim_up_at_full_does_nothing():
     assert next_factor([254.0], 1.0, "up") is None
+    assert next_factor([254.0, 127.0], 2.0, "up") is None
 
 
 def test_dim_preserves_ratios():
@@ -72,14 +71,16 @@ def test_dim_preserves_ratios():
     assert (254 - a) == pytest.approx(2 * (127 - b), abs=1)
 
 
-def test_dim_down_stops_before_any_lamp_rounds_to_zero():
+def test_dim_down_until_every_lamp_is_at_minimum():
     bases = [pct_to_level(1.2), pct_to_level(100)]  # night-like: 3.05 and 254
     f = 1.0
     while (new := next_factor(bases, f, "down")) is not None:
         f = new
-    assert round(bases[0] * f) >= 1
-    assert round(bases[0] * f * 0.85) < 1  # one more step would turn it off
-    assert all(level(b, f) >= 1 for b in bases)
+    assert [level(b, f) for b in bases] == [1, 1]  # never 0: dimming never turns off
+
+
+def test_dim_down_at_minimum_does_nothing():
+    assert next_factor([1.0], 1.0, "down") is None
 
 
 def test_dim_without_dimmable_lamps_on():

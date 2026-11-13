@@ -86,20 +86,26 @@ def next_factor(bases_on: list[float], factor: float, direction: str) -> float |
     """New dim factor after one press, or None if the press changes nothing.
 
     bases_on: base brightness of the dimmable lamps that are currently on.
-    up:   x1.15, but stop exactly when the brightest lamp reaches 100 %.
-    down: x0.85, unless that would round any lamp to 0 (then stay).
+    The wall switch covers the full range of the lamps (decision 2026-11-13):
+    up:   x1.15 until *every* lamp is at 100 %. Lamps that get there first
+          stay at 100 % while the dimmer ones keep rising.
+    down: x0.85 until every lamp is at its minimum (level 1). Lamps never
+          turn off.
+    Below the extremes the ratios between lamps stay as in the scene; at the
+    extremes they get squeezed, and come back when dimming the other way
+    (each lamp keeps its base, only f changes).
     """
     bases = [b for b in bases_on if b > 0]
     if not bases:
         return None
     if direction == "up":
-        cap = Z2M_MAX / max(bases)
-        if factor >= cap - 1e-9 or level(max(bases), factor) >= Z2M_MAX:
+        cap = Z2M_MAX / min(bases)  # the dimmest lamp reaches 100 %
+        if factor >= cap - 1e-9 or level(min(bases), factor) >= Z2M_MAX:
             return None
         return min(factor * DIM_UP, cap)
     if direction == "down":
-        new = factor * DIM_DOWN
-        if any(round(b * new) < 1 for b in bases):
+        floor = 1 / max(bases)  # the brightest lamp is at the minimum
+        if factor <= floor + 1e-12 or level(max(bases), factor) <= 1:
             return None
-        return new
+        return max(factor * DIM_DOWN, floor)
     raise ValueError(f"direction must be 'up' or 'down', got {direction!r}")
