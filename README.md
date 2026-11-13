@@ -65,6 +65,9 @@ Try actions with curl (in dry run they are only logged):
 
 ```bash
 curl -X POST localhost:8000/api/schedule/next                       # "Nächste Phase"
+curl -X POST localhost:8000/api/schedule/back                       # previous phase
+curl -X POST localhost:8000/api/schedule/resume                     # "Zeitplan": forget manual phase + colour
+curl -X POST localhost:8000/api/all/dim -H 'content-type: application/json' -d '{"direction":"up"}'   # "Alle Zimmer"
 curl -X POST localhost:8000/api/rooms/Bad/dim -H 'content-type: application/json' -d '{"direction":"down"}'
 curl -X POST localhost:8000/api/colour -H 'content-type: application/json' -d '{"master_ct":0.5}'
 curl -X DELETE localhost:8000/api/colour                            # back to automatic
@@ -101,7 +104,7 @@ docker run --rm -p 127.0.0.1:8766:8000 -e MQTT_HOST=<broker-ip> -e DRY_RUN=true 
 
 - **One publish chokepoint** (`app/mqtt/publisher.py`): every MQTT command passes the hard-rule guards (never pveSwitch, no scene_recall, no colour to plugs, groups only "off", colour clamped to 153–370) and the dry-run switch.
 - **Pure logic with an injected clock** (`app/domain/`): phases, colour and dimming are functions of settings, stored events and `now`. Tests jump through days with a fake clock; after a restart the app computes exactly where it should be.
-- **Never steps backwards**: the phase timeline is one walk through all boundaries in time order; a boundary applies only if it moves the phase forward (kalt always starts a new day). A manual "next phase" is just another event in that walk.
+- **Never steps backwards**: the phase timeline is one walk through all boundaries in time order; a scheduled boundary applies only if it moves the phase forward (kalt always starts a new day). A manual "next" or "back" press is just another event in that walk and always applies; "Zeitplan" deletes those events.
 - **Self-healing colour**: every 30 s the scheduler compares each lit lamp's *reported* colour with the target and corrects differences. That handles ramps, lamps powered on later, and lost commands the same way.
 - **Sunrise records**: each day's run is stored (running / fallback / done / cancelled / missed). After a restart the record decides: resume the animation at the right point, apply the final state, or report a missed run. A run with problems leaves a warning (also in `/health`); a good run shows nothing.
 - **Durations in UTC**: Python adds/subtracts aware local datetimes in wall-clock time, which is wrong on DST days. Durations are computed with UTC/timestamps; local time is only used for "07:00 today".

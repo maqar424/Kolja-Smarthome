@@ -92,21 +92,22 @@ Four phases, each with one scene. Scene names are the same in every group (Z2M i
 - **At a phase change, rooms that are on fade automatically to the new phase scene**; the room's dim factor resets to 1. Rooms that are off stay off.
 - The new scene is applied **fully**, including on/off per lamp: a lamp whose new value is `off` turns off, and a lamp that is off but has a value in the new scene turns on. Example: warm → twilight turns off `wzDeckenlampe` and `wzTowerlampe`; twilight → night turns on `kuecheTischlampe` (100 %, intended) in a lit Küche. A room never switches on or off *as a whole* at a phase change.
 
-### Manual "next phase"
+### Manual "next phase" / "previous phase" / "Zeitplan"
 
-- A button in the app moves the day phase one step forward **now**: kalt → warm → twilight → night. It behaves exactly like an automatic phase change: rooms that are on fade to the new scene (applied fully, see above), **no room switches on or off as a whole**, wall switches use the new phase from then on.
-- In phase **night** the button does nothing (disabled).
+- A button in the app moves the day phase one step forward **now**: kalt → warm → twilight → night. A second button moves it one step **back** (night → twilight → warm → kalt; changed 2026-11-13). Both behave exactly like an automatic phase change: rooms that are on fade to the new scene (applied fully, see above), **no room switches on or off as a whole**, wall switches use the new phase from then on.
+- In phase **night** "next" is disabled; in phase **kalt** "back" is disabled (kalt starts the day).
 - Colour changes to the new phase's colour within a few seconds (no 60-min ramp). A manual colour override from the master slider ends.
-- **The schedule never steps backwards:** after a manual advance, the schedule takes over again at its next boundary that leads to a *later* phase, or at the start of `kalt` the next morning. Example: advanced to night at 20:00 → the scheduled twilight at 21:00 is skipped, the day restarts with kalt at 07:00.
+- **The schedule itself never steps backwards:** after a manual change, the schedule takes over again at its next boundary that leads to a *later* phase, or at the start of `kalt` the next morning. Example: advanced to night at 20:00 → the scheduled twilight at 21:00 is skipped, the day restarts with kalt at 07:00. Stepped back from twilight to warm at 21:30 → warm until the scheduled night at 22:30. Stepped back to kalt in the evening → the next scheduled twilight/night applies and the colour ramps warm again (warm ramp duration).
+- **"Zeitplan ↺"** (shown while the phase was changed by hand): forgets all manual phase changes and the colour override; the app follows the plan again at once (lit rooms fade to the scheduled scene).
 
 ## 6. Brightness and dimming
 
 - Each room has an **active scene** and a **dim factor `f`** (starts at 1).
 - Lamp brightness = scene brightness × `f` (Z2M brightness 0–254, rounded).
 - Each dim press multiplies `f` by **1.15 (up)** or **0.85 (down)**.
-- **Up** may exceed the scene; it stops when the brightest lamp of the room reaches 100 %.
-- **Down** stops at the last step before any lamp would round to 0. Dimming never turns a lamp off.
-- Ratios between lamps are preserved (lamp at 100 % changes twice as much as a lamp at 50 %).
+- Dimming covers the **full range of the lamps** (changed 2026-11-13): **up** continues until *every* lamp of the room is at 100 % (lamps that get there first stay at 100 %); **down** continues until every lamp is at its minimum (Z2M brightness 1). Dimming never turns a lamp off.
+- Ratios between lamps are preserved between the extremes (lamp at 100 % changes twice as much as a lamp at 50 %). Near the extremes they are squeezed; dimming the other way brings them back (each lamp keeps its scene base, only `f` changes).
+- From a scene to the extreme takes up to about 20 presses up or 35 presses down.
 - Only lamps that are on in the room are affected; on/off-only lamps ignore dimming.
 - Brightness changes from the app on a single lamp set that lamp directly *(default)*.
 
@@ -131,7 +132,7 @@ Only these four switches are in scope. Only the press matters (duration irreleva
 
 `kuecheButton` press → `kuecheWasserkocher` on, switched off again after **180 s**. A press while the kettle is running switches it **off immediately**. The timer is persisted so a restart still switches the kettle off. Behind `BUTTONS_ENABLED` like the wall switches. No other control of the kettle plug.
 
-One physical press sends `press`, `release` and `on`/`off` (alternating per press, measured 2026-11-12), so messages within 3 s count as one press. The old hub apparently reacted to only one of `on`/`off`, which is why it needed two presses; the app reacts to every press.
+One physical press sends `press`, `release` and `on`/`off` (alternating per press, measured 2026-11-12), so messages within 0.8 s count as one press (`press` and `on`/`off` arrive at the same instant; 3 s felt like a cooldown, changed 2026-11-13). The old hub apparently reacted to only one of `on`/`off`, which is why it needed two presses; the app reacts to every press.
 
 ## 7a. Sunrise wake-up
 
@@ -192,19 +193,25 @@ Three tabs:
 
 | Left: Plugs | Middle: Floor plan (start screen) | Right: Settings |
 |---|---|---|
-| Non-lamp plugs (`pveSwitch`, `kuecheWasserkocher`): live power, read-only, no switching *(default)*. `pveSwitch` is only ever read; publishing to it is blocked in code. Tap → pop-up chart of power history | `apartment-floorplan.svg` with lamp markers at `pos_x_cm`/`pos_y_cm`, showing on/off and brightness. Tap lamp → on/off, brightness. Tap room → room on/off, dim, scene. Master colour slider and "Alles aus" | Phase times, sun toggle, colour ramp durations, location, back-to-automatic, sunrise wake-up (toggle "Sonnenaufgang", time, duration, "Test") |
+| Non-lamp plugs (`pveSwitch`, `kuecheWasserkocher`): live power, read-only, no switching *(default)*. `pveSwitch` is only ever read; publishing to it is blocked in code. Tap → pop-up chart of power history | `apartment-floorplan.svg` with lamp markers at `pos_x_cm`/`pos_y_cm`, showing on/off and brightness. Tap lamp → on/off; long press → brightness. Room list top left ("Alle Zimmer" + each room) → room on/off, dim, scene. Tapping the plan itself only switches lamps. Master colour slider and "Alles aus" / "Alles an" | Phase times, sun toggle, colour ramp durations, location, back-to-automatic, sunrise wake-up (toggle "Sonnenaufgang", time, duration, "Test") |
 
 - **UI language: German.** Code, comments and docs in English.
 - Optimised for phone portrait; works on desktop too.
 - Live state updates (lamps switched by wall switches appear immediately).
 
-### Phase bar and "next phase" button (floor plan tab, next to each other)
+### Phase bar and phase buttons (floor plan tab: back, bar, next)
 
 - A thin horizontal bar for **today**: 00:00 at the left edge, 23:59 at the right. Segment lengths are proportional to the real phase times.
 - Colours: **night = black**, **kalt = blue**, **warm = orange**, **twilight = a less bright orange**. Night appears twice (before kalt and after night begins).
 - A marker shows the current time.
 - The bar shows **today's effective times**: sun-mode times computed for today, edited times immediately, an early day start from the sunrise wake-up, and a manual advance (the boundary moves to the moment of the press).
-- The "next phase" button sits right next to the bar and is disabled during night.
+- "Previous phase" sits left of the bar, "next phase" right of it; "next" is disabled during night, "back" during kalt. Below the bar, "Zeitplan ↺" appears while the phase was changed by hand.
+
+### Floor plan controls (changed 2026-11-13)
+
+- **Room list** at the top left of the plan: "Alle Zimmer" and every room, a dot shows if it is lit. Each opens the bottom sheet with on/off, dim and scene. "Alle Zimmer": on = top-press logic in every room, off = all off, dim = every lit room with its own factor, scene = every room on in that scene.
+- The bottom sheet opens **above** the master colour slider and "Alles aus/an", so the global colour is always reachable on the floor plan.
+- **"Alles aus" / "Alles an"**: while any room is lit the button says "Alles aus" (all off, as before); when everything is off it says "Alles an" and turns on every room in the scene of the current phase (same as holding the Flur top button).
 
 ### Floor plan tab in detail
 
@@ -276,3 +283,15 @@ Hue tap dial switches, Hue smart button `wzTowerbutton` (the kettle button `kuec
 | `pveSwitch` | Power read and recorded, never commanded (§8, §9) |
 | `kuecheTischlampe` 100 % in night | Intended |
 | Excel → app | Import script reading the xlsx directly, output `config/*.json` (§3) |
+
+## 15. Changes after the first test run on the Pi (2026-11-13)
+
+| Feedback | Decision |
+|---|---|
+| Colour slider hidden behind the room sheet | Sheet opens above the plan controls (§8) |
+| Kettle button felt like it had a cooldown | Debounce 3 s → 0.8 s (§7) |
+| Phase can only go forward | "Previous phase" button + "Zeitplan ↺" to return to the plan (§5) |
+| Wall switch dimming limited by the scene | Full range of the lamps, up to 100 % / down to minimum for every lamp (§6) |
+| Tapping a room opened its menu | Room list top left opens menus; the plan only switches lamps (§8) |
+| "Alles aus" only | Turns into "Alles an" when everything is off (§8) |
+| Dev instance and Pi kicked each other off the broker | MQTT client id is unique per host/container (`kolja-smarthome-<hostname>`) |
