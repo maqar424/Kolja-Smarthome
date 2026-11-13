@@ -14,11 +14,15 @@
 </head>
 <body>
   <header id="topbar">
+    <button id="prev-phase" class="phase-step" title="Vorherige Phase">←</button>
     <div id="phase-wrap">
       <div id="phase-bar" aria-label="Tagesphasen heute"></div>
-      <div id="phase-text">&nbsp;</div>
+      <div id="phase-line">
+        <div id="phase-text">&nbsp;</div>
+        <button id="resume-schedule" hidden title="Manuelle Phase und Farbe beenden, wieder nach Zeitplan">Zeitplan ↺</button>
+      </div>
     </div>
-    <button id="next-phase" title="Nächste Phase jetzt starten">Nächste ⏭</button>
+    <button id="next-phase" class="phase-step" title="Nächste Phase">→</button>
   </header>
 
   <div id="banners"></div>
@@ -29,7 +33,7 @@
     </section>
 
     <section id="tab-plan" class="tab active">
-      <div id="plan"></div>
+      <div id="plan"><nav id="room-list" aria-label="Zimmer"></nav></div>
       <div id="plan-controls">
         <div class="colour-row">
           <label for="colour">Farbe</label>

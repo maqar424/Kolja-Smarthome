@@ -15,6 +15,7 @@ window.addEventListener("unhandledrejection", (e) => window.__errors.push(String
 const SVGNS = "http://www.w3.org/2000/svg";
 const LONG_PRESS_MS = 450;
 const PLUG_LAMP_MIRED = 370; // lamps on plugs have their own fixed light; draw them warm
+const ALL_ROOMS = "*"; // selection id of the "Alle Zimmer" sheet
 
 let config = null;
 let snap = null;
@@ -159,13 +160,13 @@ async function initPlan() {
   for (const room of config.rooms) {
     const path = root.querySelector(`#${CSS.escape(room.svg_id)}`);
     if (!path) continue;
-    path.classList.add("room");
-    path.addEventListener("click", () => openRoom(room.room));
+    path.classList.add("room"); // taps on the plan only switch lamps; rooms open from the list
     roomEls[room.room] = path;
     const label = [...root.querySelectorAll("text.name")].find((t) => isInside(path, t));
     if (label) label.textContent = room.display_name;
   }
 
+  buildRoomList();
   buildLight(root);
 
   const group = svg("g", { id: "lamps" });
@@ -178,6 +179,28 @@ async function initPlan() {
   // Room names on top of the lamps (they don't take taps, see CSS).
   const labels = root.querySelector("#labels");
   if (labels) root.append(labels);
+}
+
+/** Top left of the plan: "Alle Zimmer" and every room, each opens its sheet. */
+const roomListEls = {};
+
+function buildRoomList() {
+  const list = $("#room-list");
+  const entries = [{ id: ALL_ROOMS, name: "Alle Zimmer", open: openAll }]
+    .concat(config.rooms.map((r) => ({ id: r.room, name: r.display_name, open: () => openRoom(r.room) })));
+  for (const entry of entries) {
+    const node = el("button", { class: "room-item", onclick: entry.open }, el("span", { class: "dot-lit" }), entry.name);
+    roomListEls[entry.id] = node;
+    list.append(node);
+  }
+}
+
+function paintRoomList() {
+  for (const [id, node] of Object.entries(roomListEls)) {
+    const lit = id === ALL_ROOMS ? snap.state.rooms.some((r) => r.on) : roomState(id).on;
+    node.classList.toggle("lit", lit);
+    node.classList.toggle("selected", Boolean(selection && selection.type === "room" && selection.id === id));
+  }
 }
 
 // ------------------------------------------------------------------ live lighting
@@ -377,7 +400,18 @@ function tapLamp(name) {
 
 // ------------------------------------------------------------------ bottom sheet
 
+/** On the floor plan the sheet opens above colour slider and "Alles aus/an",
+ * so the global colour stays reachable while a room or lamp is open. */
+function placeSheet() {
+  const planActive = $("#tab-plan").classList.contains("active");
+  const controls = $("#plan-controls");
+  const offset = planActive ? Math.max(0, window.innerHeight - controls.getBoundingClientRect().top) : 0;
+  document.documentElement.style.setProperty("--sheet-bottom", `${Math.round(offset)}px`);
+  document.body.classList.toggle("sheet-above-controls", offset > 0);
+}
+
 function openSheet(sel, render) {
+  placeSheet();
   selection = sel;
   sheetRender = render;
   renderSheet();
@@ -404,6 +438,7 @@ function paintSelection() {
   for (const [room, path] of Object.entries(roomEls)) {
     path.classList.toggle("selected", Boolean(selection && selection.type === "room" && selection.id === room));
   }
+  paintRoomList();
 }
 
 function slider(min, max, value, onCommit, format) {
@@ -481,6 +516,29 @@ function openRoom(roomName) {
   });
 }
 
+function openAll() {
+  openSheet({ type: "room", id: ALL_ROOMS }, () => {
+    const lit = snap.state.rooms.filter((r) => r.on);
+    const sub = lit.length === 0 ? "alles aus"
+      : lit.length === snap.state.rooms.length ? "alle Zimmer an"
+        : `an: ${lit.map((r) => r.display_name).join(", ")}`;
+    return [
+      el("h2", {}, "Alle Zimmer"),
+      el("div", { class: "sub" }, sub),
+      el("div", { class: "row" },
+        button("Ein", () => act("POST", "/api/all-on")),
+        button("Aus", () => act("POST", "/api/all-off"))),
+      el("div", { class: "row" },
+        button("− Dunkler", () => act("POST", "/api/all/dim", { direction: "down" })),
+        button("+ Heller", () => act("POST", "/api/all/dim", { direction: "up" }))),
+      el("div", { class: "label" }, "Szene für alle Zimmer"),
+      el("div", { class: "chips" }, scenesInDayOrder().map((s) =>
+        button(s.display_name, () => act("POST", "/api/all/scene", { scene: s.key }),
+          `chip${lit.length && lit.every((r) => r.scene === s.key) ? " active" : ""}`))),
+    ];
+  });
+}
+
 // ------------------------------------------------------------------ phase bar / colour
 
 function renderPhase() {
@@ -508,8 +566,21 @@ function renderPhase() {
 
   const next = $("#next-phase");
   next.disabled = !s.can_advance;
-  next.textContent = s.can_advance ? `→ ${phaseName(s.next_phase)}` : "Nacht";
-  next.title = s.can_advance ? `Jetzt zu ${phaseName(s.next_phase)} wechseln` : "In der Nacht gibt es keine nächste Phase";
+  next.replaceChildren(el("small", {}, "→"), s.can_advance ? phaseName(s.next_phase) : "–");
+  next.title = s.can_advance ? `Jetzt zu ${phaseName(s.next_phase)} wechseln` : "Nach der Nacht kommt der nächste Morgen";
+  const prev = $("#prev-phase");
+  prev.disabled = !s.can_go_back;
+  prev.replaceChildren(el("small", {}, "←"), s.can_go_back ? phaseName(s.previous_phase) : "–");
+  prev.title = s.can_go_back ? `Zurück zu ${phaseName(s.previous_phase)}` : "Kalt ist die erste Phase des Tages";
+  $("#resume-schedule").hidden = !s.manual;
+}
+
+function renderAllButton() {
+  const anyOn = snap.state.rooms.some((r) => r.on);
+  const btn = $("#all-off");
+  btn.textContent = anyOn ? "Alles aus" : "Alles an";
+  btn.className = anyOn ? "danger" : "primary";
+  btn.title = anyOn ? "Alle Lampen aus" : "Alle Zimmer an, in der Szene der aktuellen Phase";
 }
 
 function renderColour() {
@@ -921,6 +992,8 @@ function render() {
   }
   for (const name of Object.keys(lampEls)) paintLamp(name);
   renderColour();
+  renderAllButton();
+  paintRoomList();
   renderBanners();
   renderPlugs();
   fillSettings();
@@ -952,7 +1025,13 @@ function wireControls() {
   }
   $("#sheet-backdrop").addEventListener("click", closeSheet);
   $("#next-phase").addEventListener("click", () => act("POST", "/api/schedule/next"));
-  $("#all-off").addEventListener("click", () => act("POST", "/api/all-off"));
+  $("#prev-phase").addEventListener("click", () => act("POST", "/api/schedule/back"));
+  $("#resume-schedule").addEventListener("click", () => act("POST", "/api/schedule/resume"));
+  $("#all-off").addEventListener("click", () => {
+    const anyOn = snap && snap.state.rooms.some((r) => r.on);
+    act("POST", anyOn ? "/api/all-off" : "/api/all-on");
+  });
+  window.addEventListener("resize", () => { if (sheetRender) placeSheet(); });
   const colour = $("#colour");
   colour.addEventListener("input", () => { colourDragging = true; });
   colour.addEventListener("change", async () => {

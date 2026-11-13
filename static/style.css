@@ -78,9 +78,18 @@ button.chip.active { background: var(--accent); color: #1a1208; border-color: tr
 .seg.kalt { background: #4a90e2; }
 .seg.warm { background: #f39c32; }
 .seg.twilight { background: #a8682c; }
-#phase-text { font-size: 13px; color: var(--muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#phase-line { display: flex; align-items: center; gap: 8px; margin-top: 4px; min-height: 26px; }
+#phase-text { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #phase-text b { color: var(--text); font-weight: 600; }
-#next-phase { min-height: 40px; padding: 0 12px; font-size: 14px; white-space: nowrap; }
+#resume-schedule {
+  min-height: 26px; padding: 0 9px; font-size: 12px; white-space: nowrap;
+  border-color: var(--accent); color: var(--accent); border-radius: 999px;
+}
+.phase-step {
+  min-height: 44px; min-width: 52px; padding: 2px 6px; font-size: 12.5px; line-height: 1.15;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; white-space: nowrap;
+}
+.phase-step small { font-size: 15px; }
 
 /* ---------------------------------------------------------------- banners */
 
@@ -107,6 +116,7 @@ main { flex: 1; min-height: 0; position: relative; }
 #tab-plan.active { display: flex; flex-direction: column; overflow: hidden; }
 
 nav#tabs {
+  position: relative; z-index: 12;
   display: flex;
   border-top: 1px solid var(--line);
   background: var(--surface);
@@ -123,15 +133,29 @@ nav#tabs button.active { color: var(--accent); }
 /* ---------------------------------------------------------------- floor plan */
 
 #plan {
+  position: relative;
   flex: 1; min-height: 0;
   display: flex; align-items: center; justify-content: center;
   padding: 4px 8px;
 }
 #plan svg { height: 100%; width: 100%; max-width: 100%; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 
+/* room list, top left over the plan */
+#room-list {
+  position: absolute; top: 8px; left: 10px; z-index: 2;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+}
+.room-item {
+  min-height: 32px; padding: 0 11px 0 9px; font-size: 13px; border-radius: 999px;
+  display: flex; align-items: center; gap: 7px;
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+}
+.room-item .dot-lit { width: 8px; height: 8px; border-radius: 50%; background: #4a525d; transition: background .3s; }
+.room-item.lit .dot-lit { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.room-item.selected { border-color: var(--accent); }
+
 /* restyle the floor plan for the dark UI */
 #plan .floor { fill: #1d2228; transition: fill .3s; }
-#plan .floor.room { cursor: pointer; }
 #plan .floor.room.lit { fill: #262c34; } /* the glows do the rest */
 
 /* live lighting: see buildLight() in app.js */
@@ -161,6 +185,7 @@ nav#tabs button.active { color: var(--accent); }
 /* ---------------------------------------------------------------- plan controls */
 
 #plan-controls {
+  position: relative; z-index: 12; /* stays above the sheet: colour is always reachable */
   padding: 8px 14px 10px;
   display: flex; flex-direction: column; gap: 8px;
   border-top: 1px solid var(--line);
@@ -189,17 +214,18 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
 /* ---------------------------------------------------------------- bottom sheet */
 
 #sheet-backdrop {
-  position: fixed; inset: 0; background: #0007;
+  position: fixed; inset: 0; bottom: var(--sheet-bottom, 0px); background: #0007;
   opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10;
 }
 #sheet {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 11;
+  position: fixed; left: 0; right: 0; bottom: var(--sheet-bottom, 0px); z-index: 11;
   background: var(--surface); border-top: 1px solid var(--line);
   border-radius: 18px 18px 0 0;
   padding: 10px 18px calc(18px + var(--safe-bottom));
   transform: translateY(105%); transition: transform .22s ease-out;
-  max-height: 80vh; overflow-y: auto;
+  max-height: calc(80vh - var(--sheet-bottom, 0px)); overflow-y: auto;
 }
+body.sheet-above-controls #sheet { padding-bottom: 14px; box-shadow: 0 -8px 24px #0008; }
 body.sheet-open #sheet { transform: none; }
 body.sheet-open #sheet-backdrop { opacity: 1; pointer-events: auto; }
 #sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 10px; }
