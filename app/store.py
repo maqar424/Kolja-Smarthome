@@ -81,6 +81,9 @@ class Store:
         items = [m for m in self.manual_advances() if m.at >= keep_after] + [advance]
         self.set("manual_advances", [{"at": m.at.isoformat(), "to": m.to} for m in items])
 
+    def clear_manual_advances(self) -> None:
+        self.delete("manual_advances")
+
     def colour_override(self) -> ColourEvent | None:
         data = self.get("colour_override")
         if not data:

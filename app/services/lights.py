@@ -193,6 +193,18 @@ class LightService:
         for room in self.config.rooms:
             await self.room_on(room)
 
+    async def all_dim(self, direction: str) -> bool:
+        """Dim every room that is on, each with its own factor (app: "Alle Zimmer")."""
+        changed = False
+        for room in self.config.rooms:
+            changed = await self.dim(room, direction) or changed
+        return changed
+
+    async def all_scene(self, scene: str) -> None:
+        """Every room on in `scene` (app: "Alle Zimmer")."""
+        for room in self.config.rooms:
+            await self.apply_scene(room, scene, transition=T_BUTTON, explicit=True)
+
     async def all_off(self, verify: bool = True) -> None:
         lamps = [d for d in self.config.devices.values() if d.in_all_off and not d.protected]
         if self.locked:

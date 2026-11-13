@@ -118,6 +118,34 @@ def test_advance_kalt_to_warm_skips_scheduled_warm():
     assert tl.phase_at(at(2026, 11, 12, 19)) == "warm"
 
 
+def test_step_back_holds_until_next_scheduled_boundary():
+    """Decision 2026-11-13: twilight -> back to warm at 21:30; night at 22:30 as planned."""
+    manual = [ManualAdvance(at(2026, 11, 12, 21, 30), "warm")]
+    tl = PhaseTimeline(DEFAULT, at(2026, 11, 12, 21, 30), manual)
+    assert tl.phase == "warm" and tl.manual
+    assert tl.previous_phase() == "kalt" and tl.next_phase() == "twilight"
+    nxt = tl.next_boundary(tl.now)
+    assert (nxt.phase, hm(nxt.at)) == ("night", "22:30")
+    assert not PhaseTimeline(DEFAULT, at(2026, 11, 12, 23), manual).manual
+
+
+def test_back_to_kalt_in_the_evening_then_schedule_warms_up_again():
+    manual = [ManualAdvance(at(2026, 11, 12, 18, 30), "kalt")]
+    tl = PhaseTimeline(DEFAULT, at(2026, 11, 12, 18, 30), manual)
+    assert tl.phase == "kalt" and not tl.can_go_back()
+    assert tl.phase_at(at(2026, 11, 12, 21, 0)) == "twilight"
+    events = events_from_boundaries(tl.boundaries, DEFAULT)
+    assert colour_at(events, at(2026, 11, 12, 20, 0)).master_ct == 0.0  # kalt, cold
+    assert colour_at(events, at(2026, 11, 12, 22, 0)).master_ct == 1.0  # twilight ramped warm
+
+
+def test_advance_and_back_cancel_out():
+    manual = [ManualAdvance(at(2026, 11, 12, 12, 0), "warm"), ManualAdvance(at(2026, 11, 12, 12, 5), "kalt")]
+    tl = PhaseTimeline(DEFAULT, at(2026, 11, 12, 12, 10), manual)
+    assert tl.phase == "kalt"
+    assert tl.phase_at(at(2026, 11, 12, 18, 30)) == "warm"  # scheduled warm applies again
+
+
 def test_next_phase_order():
     tl = PhaseTimeline(DEFAULT, at(2026, 11, 12, 12))
     assert tl.phase == "kalt" and tl.next_phase() == "warm"

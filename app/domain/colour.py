@@ -7,7 +7,7 @@ lands on exactly the right value.
 Events
   ramp      starts at a phase boundary: from the *current* value to the target
             over a duration (warm: -> 1 over 60 min, kalt: -> 0 over 30 min)
-  jump      immediate change (manual "next phase", early day start by sunrise)
+  jump      immediate change (manual phase change, early day start by sunrise)
   override  master slider; holds until the next ramp or jump starts
 """
 
@@ -49,15 +49,22 @@ class ColourEvent:
 
 def events_from_boundaries(boundaries: list[Boundary], settings: ScheduleSettings) -> list[ColourEvent]:
     events = []
+    previous: Boundary | None = None
     for b in boundaries:
         if b.source == "manual":
             events.append(ColourEvent(b.at, "jump", PHASE_COLOUR[b.phase]))
+        elif previous is not None and previous.source == "manual" and b.phase in ("twilight", "night") \
+                and PHASE_COLOUR[previous.phase] != PHASE_COLOUR[b.phase]:
+            # Stepped back to kalt in the evening: the schedule takes over again
+            # with twilight/night, which have no ramp of their own -> warm up.
+            events.append(ColourEvent(b.at, "ramp", 1.0, settings.warm_ramp_min * 60.0))
         elif b.phase == "kalt" and b.source == "wake":
             events.append(ColourEvent(b.at, "jump", 0.0))
         elif b.phase == "kalt":
             events.append(ColourEvent(b.at, "ramp", 0.0, settings.kalt_ramp_min * 60.0))
         elif b.phase == "warm":
             events.append(ColourEvent(b.at, "ramp", 1.0, settings.warm_ramp_min * 60.0))
+        previous = b
     return events
 
 

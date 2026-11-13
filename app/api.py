@@ -147,6 +147,9 @@ def build_router(services: "Services") -> APIRouter:
             "phase": timeline.phase,
             "can_advance": timeline.can_advance(),
             "next_phase": timeline.next_phase(),
+            "can_go_back": timeline.can_go_back(),
+            "previous_phase": timeline.previous_phase(),
+            "manual": timeline.manual,
             "next_boundary": {"phase": nxt.phase, "at": nxt.at.isoformat(timespec="seconds")} if nxt else None,
             "segments": [
                 {"phase": s.phase, "start": s.start.isoformat(timespec="seconds"),
@@ -172,6 +175,18 @@ def build_router(services: "Services") -> APIRouter:
         if phase is None:
             raise HTTPException(409, "In der Nacht gibt es keine nächste Phase.")
         return {"phase": phase}
+
+    @router.post("/schedule/back")
+    async def previous_phase():
+        phase = schedule.back()
+        if phase is None:
+            raise HTTPException(409, "Kalt ist die erste Phase des Tages.")
+        return {"phase": phase}
+
+    @router.post("/schedule/resume")
+    async def resume_schedule():
+        schedule.resume_schedule()
+        return {"phase": schedule.phase()}
 
     @router.put("/schedule/settings")
     async def put_settings(data: dict):
@@ -230,6 +245,15 @@ def build_router(services: "Services") -> APIRouter:
     @router.post("/all-on")
     async def all_on():
         await lights.all_on()
+        return {"ok": True}
+
+    @router.post("/all/dim")
+    async def all_dim(body: DimIn):
+        return {"changed": await lights.all_dim(body.direction)}
+
+    @router.post("/all/scene")
+    async def all_scene(body: SceneIn):
+        await lights.all_scene(body.scene)
         return {"ok": True}
 
     # ------------------------------------------------------------------ sunrise

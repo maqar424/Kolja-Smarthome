@@ -1,18 +1,21 @@
 """Day phases: kalt -> warm -> twilight -> night, with sun mode, an early day
-start from the sunrise wake-up, and the manual "next phase" button.
+start from the sunrise wake-up, and the manual "next phase" / "previous
+phase" buttons.
 
-How "never steps backwards" works
----------------------------------
-We walk through all boundaries (scheduled ones and manual advances) in time
-order and keep track of the current phase:
+How "the schedule never steps backwards" works
+----------------------------------------------
+We walk through all boundaries (scheduled ones and manual phase changes) in
+time order and keep track of the current phase:
 
-* a manual advance always applies (it only ever moves one step forward);
+* a manual change always applies (one step forward or back, by Kolja);
 * a scheduled boundary into `kalt` always applies: it starts a new day;
 * any other scheduled boundary applies only if it moves the phase *forward*.
 
 Example: advanced to night at 20:00 -> the scheduled twilight (21:00) and
 night (22:30) do not move forward, so they are skipped; kalt at 07:00 the next
-morning applies again.
+morning applies again. Stepped back from twilight to warm at 21:30 -> warm
+holds until the scheduled night at 22:30. "Back to schedule" simply forgets
+all manual changes.
 
 The result is the list of boundaries that actually happened (or will happen,
 if nobody presses the button). Phase bar, current phase, next boundary and the
@@ -144,7 +147,7 @@ def effective_boundaries(
     applied: list[Boundary] = []
     for boundary in planned:
         if boundary.source == "manual":
-            applies = PHASE_INDEX[boundary.phase] > PHASE_INDEX[current]
+            applies = boundary.phase != current
         elif boundary.phase == "kalt":
             applies = current != "kalt"
         else:
@@ -205,6 +208,19 @@ class PhaseTimeline:
 
     def can_advance(self) -> bool:
         return self.phase != "night"
+
+    def can_go_back(self) -> bool:
+        return self.phase != "kalt"  # kalt starts the day; there is no "yesterday's night"
+
+    def previous_phase(self) -> str | None:
+        index = PHASE_INDEX[self.phase]
+        return PHASES[index - 1] if index > 0 else None
+
+    @property
+    def manual(self) -> bool:
+        """The current phase comes from a manual change, not from the schedule."""
+        last = self.last_boundary(self.now)
+        return last is not None and last.source == "manual"
 
     def next_phase(self) -> str | None:
         index = PHASE_INDEX[self.phase]

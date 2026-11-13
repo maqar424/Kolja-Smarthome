@@ -45,6 +45,33 @@ def test_next_phase_until_night(api):
     assert body["next_boundary"]["phase"] == "kalt"
 
 
+def test_phase_back_and_resume_schedule(api):
+    body = api.get("/api/schedule").json()  # 17:00, kalt
+    assert not body["can_go_back"] and not body["manual"]
+    assert api.post("/api/schedule/back").status_code == 409
+    api.post("/api/schedule/next")
+    api.post("/api/schedule/next")
+    assert api.post("/api/schedule/back").json() == {"phase": "warm"}
+    body = api.get("/api/schedule").json()
+    assert body["phase"] == "warm" and body["manual"] and body["previous_phase"] == "kalt"
+    api.post("/api/colour", json={"master_ct": 0.3})
+    assert api.post("/api/schedule/resume").json() == {"phase": "kalt"}
+    body = api.get("/api/schedule").json()
+    assert body["phase"] == "kalt" and not body["manual"] and not body["colour"]["override"]
+
+
+def test_all_rooms_scene_and_dim(api):
+    api.post("/api/all/scene", json={"scene": "warm"})
+    state = api.get("/api/state").json()
+    assert all(r["on"] and r["scene"] == "warm" for r in state["rooms"])
+    before = state["devices"]["wzBettlampe"]["brightness"]
+    assert api.post("/api/all/dim", json={"direction": "down"}).json() == {"changed": True}
+    assert api.get("/api/state").json()["devices"]["wzBettlampe"]["brightness"] < before
+    rooms = {r["room"]: r for r in api.get("/api/state").json()["rooms"]}
+    assert rooms["Wohnzimmer"]["factor"] < 1 and rooms["Bad"]["factor"] < 1  # every room dims itself
+    assert api.post("/api/all/scene", json={"scene": "nope"}).status_code == 422
+
+
 def test_settings_validation(api):
     r = api.put("/api/schedule/settings", json={"warm": "06:00"})
     assert r.status_code == 400 and r.json()["detail"]["errors"]

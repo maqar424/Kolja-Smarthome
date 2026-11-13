@@ -68,6 +68,26 @@ class Schedule:
         self.changed.set()
         return target
 
+    def back(self) -> str | None:
+        """Manual "previous phase". Returns the new phase, or None in kalt."""
+        now = self._clock.now()
+        timeline = self.timeline(now)
+        target = timeline.previous_phase()
+        if target is None:
+            return None
+        self._store.add_manual_advance(ManualAdvance(now, target))
+        self._store.clear_colour_override()
+        log.info("Manual step back %s -> %s", timeline.phase, target)
+        self.changed.set()
+        return target
+
+    def resume_schedule(self) -> None:
+        """Forget manual phase changes and the colour override: back to the plan."""
+        self._store.clear_manual_advances()
+        self._store.clear_colour_override()
+        log.info("Back to schedule")
+        self.changed.set()
+
     def set_override(self, master_ct: float) -> None:
         self._store.set_colour_override(self._clock.now(), clamp01(master_ct))
         self.changed.set()
