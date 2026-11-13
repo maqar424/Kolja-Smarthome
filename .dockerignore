@@ -1,0 +1,14 @@
+# Only what the Dockerfile copies matters; keep secrets and bulk out of the build context.
+.env
+*.env.local
+data/
+.venv/
+venv/
+.git/
+**/__pycache__/
+*.egg-info/
+.pytest_cache/
+tests/
+tools/
+*.zip
+docs/*.xlsx

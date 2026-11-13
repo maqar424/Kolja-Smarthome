@@ -1,0 +1,28 @@
+# Lamp remote on the Pi.
+#   git pull && docker compose up -d --build
+# Settings come from .env (copy .env.example). Only this app's container is
+# defined here; mosquitto, zigbee2mqtt and smarthome_hub are not touched.
+services:
+  lamp-remote:
+    build: .
+    image: kolja-smarthome:latest
+    container_name: kolja-smarthome
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # The broker is published on the Pi's port 1883; from inside this
+      # container the Pi itself is "host.docker.internal" (see extra_hosts).
+      MQTT_HOST: host.docker.internal
+      DATA_DIR: /data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      # LAN fallback http://<pi-ip>:8000 ; HTTPS comes from `tailscale serve`.
+      - "${HTTP_PORT:-8000}:8000"
+    volumes:
+      - ./data:/data   # SQLite: settings, room state, power history
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"   # protect the SD card
+        max-file: "3"
