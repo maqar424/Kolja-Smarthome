@@ -10,6 +10,9 @@ Stored:
   room/<room>       RoomLight: active scene, dim factor, base brightness per lamp
   applied_phase     the phase the lamps were last switched to (detects a
                     boundary missed while the app was down)
+
+Power samples live in their own table `power` (device, ts, watts): one row
+per plug per minute, about 2 million rows for 4 plugs over a year (~60 MB).
 """
 
 from __future__ import annotations
@@ -35,6 +38,12 @@ class Store:
         self._db.execute("PRAGMA synchronous=NORMAL")
         self._db.execute(
             "CREATE TABLE IF NOT EXISTS kv (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)"
+        )
+        # ts = unix seconds (UTC, DST-safe). Primary key (device, ts) is the
+        # index for history queries and makes a repeated sample harmless.
+        self._db.execute(
+            "CREATE TABLE IF NOT EXISTS power (device TEXT NOT NULL, ts INTEGER NOT NULL, watts REAL NOT NULL, "
+            "PRIMARY KEY (device, ts)) WITHOUT ROWID"
         )
 
     def close(self) -> None:
@@ -97,3 +106,34 @@ class Store:
 
     def set_applied_phase(self, phase: str, boundary_at: datetime) -> None:
         self.set("applied_phase", {"phase": phase, "at": boundary_at.isoformat()})
+
+    # ------------------------------------------------------------------ power history
+
+    def add_power_samples(self, ts: int, samples: dict[str, float]) -> None:
+        self._db.executemany(
+            "INSERT OR REPLACE INTO power (device, ts, watts) VALUES (?, ?, ?)",
+            [(device, ts, watts) for device, watts in samples.items()],
+        )
+
+    def power_buckets(self, device: str, start: int, end: int, bucket_s: int, shift_s: int = 0) -> list[tuple]:
+        """[(bucket_start_ts, avg_w, max_w, samples)] for start <= ts < end.
+
+        Buckets are aligned to local time via shift_s (the UTC offset), so a
+        one-day bucket runs from midnight to midnight.
+        """
+        return self._db.execute(
+            "SELECT ((ts + ?) / ?) * ? - ? AS b, AVG(watts), MAX(watts), COUNT(*) FROM power "
+            "WHERE device = ? AND ts >= ? AND ts < ? GROUP BY b ORDER BY b",
+            (shift_s, bucket_s, bucket_s, shift_s, device, start, end),
+        ).fetchall()
+
+    def power_sum(self, device: str, start: int, end: int) -> tuple[float, int]:
+        """(sum of watts, number of samples) for start <= ts < end."""
+        total, n = self._db.execute(
+            "SELECT COALESCE(SUM(watts), 0), COUNT(*) FROM power WHERE device = ? AND ts >= ? AND ts < ?",
+            (device, start, end),
+        ).fetchone()
+        return float(total), int(n)
+
+    def prune_power(self, before_ts: int) -> int:
+        return self._db.execute("DELETE FROM power WHERE ts < ?", (before_ts,)).rowcount

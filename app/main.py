@@ -27,6 +27,7 @@ from app.mqtt.client import MqttClient
 from app.mqtt.publisher import Publisher
 from app.services.buttons import ButtonService
 from app.services.lights import LightService
+from app.services.power import PowerRecorder
 from app.services.schedule import Schedule
 from app.services.scheduler import Scheduler
 from app.services.sunrise import SunriseService
@@ -54,6 +55,7 @@ class Services:
     scheduler: Scheduler
     buttons: ButtonService
     sunrise: SunriseService
+    power: PowerRecorder
     changes: Changes
 
 
@@ -93,10 +95,12 @@ def build_services(
         config, state, lights, publisher, store, clock,
         enabled=settings.buttons_enabled, room_blocked=sunrise.room_blocked,
     )
+    power = PowerRecorder(config, state, store, clock)
     changes = Changes()
     state.subscribe(changes.poke)  # every lamp update reaches the open browsers
     return Services(
-        settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler, buttons, sunrise, changes
+        settings, config, clock, state, publisher, mqtt, store, schedule, lights, scheduler, buttons, sunrise, power,
+        changes,
     )
 
 
@@ -110,6 +114,7 @@ def create_app(services: Services) -> FastAPI:
         if services.mqtt:
             tasks.append(asyncio.create_task(services.mqtt.run(), name="mqtt"))
             tasks.append(asyncio.create_task(_start_scheduler(services), name="scheduler"))
+            tasks.append(asyncio.create_task(services.power.run(), name="power"))
         services.buttons.resume()  # finish a kettle timer that ran before a restart
         yield
         for task in tasks:

@@ -11,6 +11,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.domain.colour import to_mired
+from app.services.power import RANGES
 
 if TYPE_CHECKING:
     from app.main import Services
@@ -262,5 +263,16 @@ def build_router(services: "Services") -> APIRouter:
     async def sunrise_dismiss():
         sunrise.dismiss_warning()
         return {"ok": True}
+
+    # ------------------------------------------------------------------ power history
+
+    @router.get("/power/{name}")
+    async def power_history(name: str, range: str = "24h"):  # noqa: A002 - query parameter name
+        device = cfg.devices.get(name)
+        if device is None or not device.has_power:
+            raise HTTPException(404, f"Keine Steckdose mit Messung: {name}")
+        if range not in RANGES:
+            raise HTTPException(400, f"Zeitraum muss einer von {', '.join(RANGES)} sein")
+        return services.power.history(name, range)
 
     return router
