@@ -400,12 +400,14 @@ function tapLamp(name) {
 
 // ------------------------------------------------------------------ bottom sheet
 
-/** On the floor plan the sheet opens above colour slider and "Alles aus/an",
- * so the global colour stays reachable while a room or lamp is open. */
+/** The sheet opens above the bottom controls: on the floor plan above colour
+ * slider and "Alles aus/an" (the global colour stays reachable), elsewhere
+ * above the tab bar. Closed, it slides fully off-screen (style.css). */
 function placeSheet() {
   const planActive = $("#tab-plan").classList.contains("active");
-  const controls = $("#plan-controls");
-  const offset = planActive ? Math.max(0, window.innerHeight - controls.getBoundingClientRect().top) : 0;
+  // floor plan: above the colour slider; other tabs: above the tab bar
+  const below = planActive ? $("#plan-controls") : $("nav#tabs");
+  const offset = Math.max(0, window.innerHeight - below.getBoundingClientRect().top);
   document.documentElement.style.setProperty("--sheet-bottom", `${Math.round(offset)}px`);
   document.body.classList.toggle("sheet-above-controls", offset > 0);
 }

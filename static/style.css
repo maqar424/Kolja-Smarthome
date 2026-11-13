@@ -222,11 +222,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
   background: var(--surface); border-top: 1px solid var(--line);
   border-radius: 18px 18px 0 0;
   padding: 10px 18px calc(18px + var(--safe-bottom));
-  transform: translateY(105%); transition: transform .22s ease-out;
+  /* closed: fully below the screen, whatever --sheet-bottom is, and not tappable */
+  transform: translateY(calc(100% + var(--sheet-bottom, 0px) + 24px));
+  visibility: hidden;
+  transition: transform .22s ease-out, visibility 0s linear .22s;
   max-height: calc(80vh - var(--sheet-bottom, 0px)); overflow-y: auto;
 }
 body.sheet-above-controls #sheet { padding-bottom: 14px; box-shadow: 0 -8px 24px #0008; }
-body.sheet-open #sheet { transform: none; }
+body.sheet-open #sheet { transform: none; visibility: visible; transition: transform .22s ease-out, visibility 0s; }
 body.sheet-open #sheet-backdrop { opacity: 1; pointer-events: auto; }
 #sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 10px; }
 #sheet h2 { margin: 0; font-size: 19px; }
