@@ -5,7 +5,7 @@ Self-hosted PWA and automation service for the Zigbee lamps in Kolja's apartment
 - Spec: [`docs/requirements.md`](docs/requirements.md)
 - Rules for working on this repo: [`CLAUDE.md`](CLAUDE.md)
 
-> Status: milestone M7 done. Everything up to the sunrise wake-up, the phone app (floor plan with live lighting, phase bar, colour, settings) and power history for the metering plugs. Next: deployment to the Pi and switch-over (M8).
+> Status: all milestones (M0–M8) done. Next: deploy on the Pi and switch over, following [`docs/deploy.md`](docs/deploy.md).
 
 ## Setup (dev VM)
 
@@ -78,7 +78,24 @@ With `DRY_RUN=true` every command is only logged (`DRY RUN  zigbee2mqtt/... {...
 
 ## Deploy (Pi)
 
-*Coming in M8.* Planned: `git pull && docker compose up -d --build`, HTTPS via `tailscale serve`.
+Step by step, including HTTPS via `tailscale serve` and the switch-over from `smarthome_hub`: [`docs/deploy.md`](docs/deploy.md).
+
+Short version for updates:
+
+```bash
+cd ~/Kolja-Smarthome && git pull && docker compose up -d --build
+```
+
+- `Dockerfile`: `python:3.12-slim`, non-root user (uid 1000), health check on `/health`. Built on the Pi itself (arm64).
+- `docker-compose.yml`: only this app's container (`kolja-smarthome`), `restart: unless-stopped`, `./data` as volume, broker reached via the Pi itself (`host.docker.internal`), log size capped for the SD card.
+- `requirements.txt`: exact dependency versions for the container (`pyproject.toml` keeps the loose ranges for development).
+
+Test the image on the VM (dry run, real broker read-only):
+
+```bash
+docker build -t kolja-smarthome:test .
+docker run --rm -p 127.0.0.1:8766:8000 -e MQTT_HOST=<broker-ip> -e DRY_RUN=true kolja-smarthome:test
+```
 
 ## How it works (short)
 
