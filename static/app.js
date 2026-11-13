@@ -108,26 +108,29 @@ const hhmm = (iso) => (iso ? iso.slice(11, 16) : "");
 const pct = (level) => Math.max(1, Math.round((level / 254) * 100));
 const phaseName = (key) => phaseNames[key] || key;
 
-/** Colour temperature (Kelvin) -> sRGB, Tanner Helland's approximation. */
-function kelvinRgb(kelvin) {
-  const t = kelvin / 100;
-  let r, g, b;
-  if (t <= 66) {
-    r = 255;
-    g = 99.4708025861 * Math.log(t) - 161.1195681661;
-    b = t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307;
-  } else {
-    r = 329.698727446 * Math.pow(t - 60, -0.1332047592);
-    g = 288.1221695283 * Math.pow(t - 60, -0.0755148492);
-    b = 255;
-  }
-  const clamp = (v) => Math.round(Math.min(255, Math.max(0, v)));
-  return [clamp(r), clamp(g), clamp(b)];
-}
-
+/** Display colour for a colour temperature (mired), for markers and glows.
+ *
+ * Not a physical conversion: real 6500 K light is nearly pure white and would
+ * look grey on the dark plan. Instead a small palette, the same idea as the
+ * colour slider: light blue (cold, 153) -> neutral (about 4000 K) -> orange
+ * (warm, 370), linear in between. */
+const MIRED_PALETTE = [
+  [153, [150, 190, 255]],
+  [250, [255, 240, 220]],
+  [370, [255, 160, 50]],
+];
 function miredColour(mired) {
-  const [r, g, b] = kelvinRgb(1e6 / mired);
-  return `rgb(${r}, ${g}, ${b})`;
+  const m = Math.min(370, Math.max(153, mired));
+  for (let i = 1; i < MIRED_PALETTE.length; i++) {
+    const [m1, c1] = MIRED_PALETTE[i];
+    if (m <= m1) {
+      const [m0, c0] = MIRED_PALETTE[i - 1];
+      const t = (m - m0) / (m1 - m0);
+      const [r, g, b] = c0.map((c, k) => Math.round(c + (c1[k] - c) * t));
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+  }
+  return "rgb(255, 160, 50)";
 }
 
 const DAY_ORDER = ["kalt", "warm", "twilight", "night"];
@@ -163,6 +166,8 @@ async function initPlan() {
     if (label) label.textContent = room.display_name;
   }
 
+  buildLight(root);
+
   const group = svg("g", { id: "lamps" });
   root.append(group);
   for (const lamp of config.lamps) {
@@ -173,6 +178,99 @@ async function initPlan() {
   // Room names on top of the lamps (they don't take taps, see CSS).
   const labels = root.querySelector("#labels");
   if (labels) root.append(labels);
+}
+
+// ------------------------------------------------------------------ live lighting
+
+/* A rough picture of the light (spec §8 "Live lighting rendering"). Each lamp
+ * owns one glow, drawn between the floor and the walls and clipped to its room,
+ * so walls block it. Glows use "screen" blending: where two lamps overlap the
+ * floor gets brighter, never darker. Points and panels are radial gradients,
+ * lines and strips a blurred band. Nothing animates continuously: on a state
+ * change only opacity and colour change, and CSS fades them (0.6 s). */
+const GLOW = { // sizes in cm (1 SVG unit = 1 cm)
+  ceiling: { r: 300, band: 90, blur: 55, peak: 0.55 }, // wide and soft: lights most of the room
+  middle: { r: 160, band: 40, blur: 30, peak: 0.7 },
+  floor: { r: 100, band: 24, blur: 16, peak: 0.85 }, // narrow, strong near the source
+  vertical: { r: 190, band: 50, blur: 35, peak: 0.65 },
+};
+const glowEls = {};
+
+function buildLight(root) {
+  const defs = svg("defs");
+  root.insertBefore(defs, root.firstChild);
+  const layer = svg("g", { id: "light" });
+  const floors = root.querySelector("#floors");
+  if (floors) floors.after(layer); else root.append(layer);
+
+  for (const room of config.rooms) {
+    const clip = svg("clipPath", { id: `clip-${room.svg_id}` });
+    clip.append(svg("use", { href: `#${room.svg_id}` }));
+    defs.append(clip);
+  }
+
+  for (const lamp of config.lamps) {
+    const spec = GLOW[lamp.mount] || GLOW.middle;
+    const room = roomByName[lamp.room];
+    const id = lamp.name.replace(/[^A-Za-z0-9_-]/g, "_");
+    const glow = svg("g", { class: "glow", ...(room ? { "clip-path": `url(#clip-${room.svg_id})` } : {}) });
+    const stops = [];
+    const bands = [];
+    if (lamp.shape === "line") {
+      (lamp.geometry || []).forEach((part, i) => {
+        const xs = part.map((p) => p[0]);
+        const ys = part.map((p) => p[1]);
+        const pad = spec.band / 2 + 3 * spec.blur;
+        // Filter region in user space and only around this strip: a blur over
+        // the whole plan would be far more work for the phone.
+        const filter = svg("filter", {
+          id: `blur-${id}-${i}`, filterUnits: "userSpaceOnUse",
+          x: Math.min(...xs) - pad, y: Math.min(...ys) - pad,
+          width: Math.max(...xs) - Math.min(...xs) + 2 * pad, height: Math.max(...ys) - Math.min(...ys) + 2 * pad,
+        });
+        filter.append(svg("feGaussianBlur", { stdDeviation: spec.blur }));
+        defs.append(filter);
+        const band = svg("polyline", {
+          points: part.map((p) => p.join(",")).join(" "), fill: "none",
+          "stroke-width": spec.band, "stroke-linecap": "round", "stroke-linejoin": "round",
+          "stroke-opacity": spec.peak, filter: `url(#blur-${id}-${i})`,
+        });
+        bands.push(band);
+        glow.append(band);
+      });
+    } else {
+      const grad = svg("radialGradient", { id: `glow-${id}` });
+      for (const [offset, factor] of [[0, 1], [0.35, 0.5], [0.7, 0.15], [1, 0]]) {
+        const stop = svg("stop", { offset, "stop-opacity": spec.peak * factor });
+        stops.push(stop);
+        grad.append(stop);
+      }
+      defs.append(grad);
+      for (const part of lamp.geometry || []) {
+        let cx, cy, r = spec.r;
+        if (lamp.shape === "rect") {
+          const [x, y, w, h] = part;
+          cx = x + w / 2; cy = y + h / 2; r += Math.max(w, h) / 2;
+        } else {
+          [cx, cy] = part;
+        }
+        glow.append(svg("circle", { cx, cy, r, fill: `url(#glow-${id})` }));
+      }
+    }
+    layer.append(glow);
+    glowEls[lamp.name] = { glow, stops, bands };
+  }
+}
+
+/** level 0..1 (brightness), colour as CSS rgb(). Off keeps the last colour so it fades out in it. */
+function paintGlow(name, on, colour, level) {
+  const g = glowEls[name];
+  if (!g) return;
+  // sqrt: a lamp at 5 % is still clearly visible, like in a dark room
+  g.glow.style.opacity = on ? (0.15 + 0.85 * Math.sqrt(level)).toFixed(3) : "0";
+  if (!on) return;
+  for (const stop of g.stops) stop.style.stopColor = colour;
+  for (const band of g.bands) band.style.stroke = colour;
 }
 
 function isInside(path, text) {
@@ -253,21 +351,20 @@ function paintLamp(name) {
 
   let colour = "#4a525d";
   let opacity = 0.85;
-  let glow = "";
+  let level = 0;
   if (on) {
     const mired = !lamp.has_colour ? PLUG_LAMP_MIRED
       : device.color_temp || snap.schedule.colour.mired;
     colour = miredColour(mired);
-    const level = lamp.dimmable && device.brightness ? device.brightness / 254 : 1;
-    opacity = 0.4 + 0.6 * level;
-    glow = `drop-shadow(0 0 ${4 + 12 * level}px ${colour})`;
+    level = lamp.dimmable && device.brightness ? device.brightness / 254 : 1;
+    opacity = 0.55 + 0.45 * level;
   }
+  paintGlow(name, on, colour, level);
   for (const shape of group.querySelectorAll(".shape")) {
     const isLine = shape.tagName.toLowerCase() === "polyline";
     shape.style.stroke = selected && !isLine ? "#ffffff" : colour;
     shape.style.fill = isLine || unknown ? "none" : colour;
     shape.style.opacity = opacity;
-    shape.style.filter = glow;
   }
 }
 

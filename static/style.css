@@ -130,9 +130,15 @@ nav#tabs button.active { color: var(--accent); }
 #plan svg { height: 100%; width: 100%; max-width: 100%; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 
 /* restyle the floor plan for the dark UI */
-#plan .floor { fill: #232931; transition: fill .3s; }
+#plan .floor { fill: #1d2228; transition: fill .3s; }
 #plan .floor.room { cursor: pointer; }
-#plan .floor.room.lit { fill: #2c3038; }
+#plan .floor.room.lit { fill: #262c34; } /* the glows do the rest */
+
+/* live lighting: see buildLight() in app.js */
+#plan #light { pointer-events: none; }
+#plan .glow { opacity: 0; mix-blend-mode: screen; transition: opacity .6s ease; }
+#plan .glow stop { transition: stop-color .6s ease; }
+#plan .glow polyline { transition: stroke .6s ease; }
 #plan .floor.room.selected { fill: #343c48; }
 #plan .walls { fill: #07090b; }
 #plan .leaf { stroke: #4b5562; stroke-width: 3; stroke-linecap: round; }
