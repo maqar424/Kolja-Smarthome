@@ -5,7 +5,7 @@ Self-hosted PWA and automation service for the Zigbee lamps in Kolja's apartment
 - Spec: [`docs/requirements.md`](docs/requirements.md)
 - Rules for working on this repo: [`CLAUDE.md`](CLAUDE.md)
 
-> Status: milestone M5 done. Everything up to the sunrise wake-up, plus the phone app (floor plan, phase bar, colour, settings, live plug power). Next: power history (M6), lighting rendering (M7), deployment (M8).
+> Status: milestone M6 done. Everything up to the sunrise wake-up, the phone app (floor plan, phase bar, colour, settings) and power history for the metering plugs. Next: lighting rendering (M7), deployment (M8).
 
 ## Setup (dev VM)
 
@@ -58,6 +58,7 @@ UI checks without a phone: the app can be screenshotted at phone size with headl
 - http://localhost:8000/api/state – rooms and live lamp/plug state
 - http://localhost:8000/api/debug/commands – last commands sent (or only logged in dry run)
 - http://localhost:8000/api/schedule – current phase, today's phase bar, colour, settings
+- http://localhost:8000/api/power/pveSwitch?range=24h – power history (`6h`, `24h`, `7d`, `30d`, `1y`): average and peak per bucket, energy
 - http://localhost:8000/docs – interactive list of all endpoints
 
 Try actions with curl (in dry run they are only logged):
@@ -71,7 +72,7 @@ curl localhost:8000/api/sunrise                                     # sunrise se
 curl -X POST localhost:8000/api/sunrise/test                        # ~1 min test run (animation + alle_kalt)
 ```
 
-State (settings, manual advances, room scenes) lives in `DATA_DIR/smarthome.db` (SQLite).
+State (settings, manual advances, room scenes) and the power history live in `DATA_DIR/smarthome.db` (SQLite). Power is sampled once a minute for all four metering plugs (pveSwitch read only) and kept for a year, about 60 MB.
 
 With `DRY_RUN=true` every command is only logged (`DRY RUN  zigbee2mqtt/... {...}`). Lamp states are not retained by Zigbee2MQTT, so at startup the app asks each lamp once (`<lamp>/get`). In dry run that only happens with `DRY_RUN_ALLOW_READS=true`; otherwise states show up as lamps report changes.
 

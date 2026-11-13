@@ -226,6 +226,9 @@ A rough visual impression of the light in the apartment, updated live from lamp 
 
 - Record power for **all** smart plugs with metering (`TS011F`: pveSwitch, kuecheWasserkocher, wzTowerlampe, wzLavalampe) *(default)*.
 - 1-minute samples, kept for **1 year** *(default)*. Stored locally (SQLite).
+- A sample is the last value the plug reported (plugs report on change). No sample while Zigbee2MQTT is offline, the plug is unavailable or has not reported since the app started: these show as gaps in the chart.
+- Chart ranges 6 h, 24 h, 7 days, 30 days, 1 year. Longer ranges show the average per bucket plus the peak, so a short kettle run stays visible. Also shown: average, peak and energy (kWh) for the range.
+- The lamp plugs (Tower, Lava) also appear on the plugs tab, below the others, read only with their history.
 
 ## 10. Reliability and safety
 
