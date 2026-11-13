@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import socket
 
 import aiomqtt
 
@@ -15,6 +16,13 @@ from app.mqtt.publisher import Publisher
 from app.state import StateStore
 
 log = logging.getLogger(__name__)
+
+
+def client_id() -> str:
+    """Unique per machine/container. The broker drops a connection when a second
+    one arrives with the same id, so a fixed id would make the Pi app and a
+    dev instance on the VM kick each other off in a loop."""
+    return f"kolja-smarthome-{socket.gethostname()}"[:64]
 
 
 class MqttClient:
@@ -33,7 +41,7 @@ class MqttClient:
                 async with aiomqtt.Client(
                     hostname=self._settings.mqtt_host,
                     port=self._settings.mqtt_port,
-                    identifier="kolja-smarthome",
+                    identifier=client_id(),
                     keepalive=30,
                 ) as client:
                     await self._on_connect(client)
