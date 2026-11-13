@@ -221,6 +221,7 @@ A rough visual impression of the light in the apartment, updated live from lamp 
 - Spread depends on `mount`: `ceiling` = wide and soft (lights most of the room), `middle` = medium, `floor` = narrow and strong near the source, `vertical` = medium.
 - Each glow is **clipped to its room's shape** (walls block light). Light leaking through door openings is optional, later.
 - Approximate, not physically correct. No continuous animation: redraw only when state changes, with a short fade. SVG gradients/filters or Canvas 2D; no WebGL needed. Must stay smooth on a mid-range phone.
+- As built (M7): SVG glows between floor and walls, clipped per room; radial gradients for points/panels, a blurred band (filter region limited to the strip) for lines. Brightness → glow opacity on a square-root curve, so lamps at a few percent stay visible. Display colour is a palette, not a physical conversion: light blue (153) → neutral (250) → orange (370), because real 6500 K light would look grey on the dark plan.
 
 ## 9. Power recording
 

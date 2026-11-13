@@ -5,7 +5,7 @@ Self-hosted PWA and automation service for the Zigbee lamps in Kolja's apartment
 - Spec: [`docs/requirements.md`](docs/requirements.md)
 - Rules for working on this repo: [`CLAUDE.md`](CLAUDE.md)
 
-> Status: milestone M6 done. Everything up to the sunrise wake-up, the phone app (floor plan, phase bar, colour, settings) and power history for the metering plugs. Next: lighting rendering (M7), deployment (M8).
+> Status: milestone M7 done. Everything up to the sunrise wake-up, the phone app (floor plan with live lighting, phase bar, colour, settings) and power history for the metering plugs. Next: deployment to the Pi and switch-over (M8).
 
 ## Setup (dev VM)
 
