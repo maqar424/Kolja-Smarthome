@@ -17,7 +17,8 @@ never taken as "still held".
 
 Kettle: kuecheButton press -> kuecheWasserkocher on, off after 180 s; a press
 while it runs switches it off at once (toggle). One physical press sends
-press, release and on/off (alternating), so presses within 3 s count once.
+press and on/off at the same instant (release follows, ignored), so messages
+within 0.8 s count as one press. Quick double presses still work.
 The off time is persisted. Once started, the timer always completes (safety),
 even if buttons are disabled in between.
 """
@@ -47,7 +48,7 @@ HOLD_GRACE_S = 0.5
 KETTLE_BUTTON = "kuecheButton"
 KETTLE_PLUG = "kuecheWasserkocher"
 KETTLE_ON_S = 180.0
-KETTLE_DEBOUNCE_S = 3.0
+KETTLE_DEBOUNCE_S = 0.8  # press + on/off arrive together; 3 s felt like a cooldown
 KETTLE_ACTIONS = {"press", "on", "off"}
 
 

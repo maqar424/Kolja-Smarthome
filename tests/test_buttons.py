@@ -226,6 +226,16 @@ async def test_kettle_second_press_switches_off(rig):
     assert rig.lamp("kuecheWasserkocher").is_on
 
 
+async def test_kettle_quick_double_press(rig):
+    """Two presses 1 s apart: on, then off (no 3-s cooldown any more)."""
+    await rig.press("kuecheButton", "press")
+    await rig.press("kuecheButton", "on")
+    await rig.settle(1.0)
+    await rig.press("kuecheButton", "press")
+    await rig.press("kuecheButton", "off")
+    assert rig.z2m.to("kuecheWasserkocher") == [{"state": "ON"}, {"state": "OFF"}]
+
+
 async def test_kettle_timer_survives_restart(rig):
     await rig.press("kuecheButton", "press")
     await rig.settle(60)
