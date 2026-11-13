@@ -4,7 +4,7 @@
  * as fallback. API calls and the live stream are never cached: without the Pi
  * there is nothing to control anyway.
  */
-const CACHE = "licht-v1";
+const CACHE = "licht-v2";
 const SHELL = [
   "/",
   "/static/app.js",

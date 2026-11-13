@@ -290,6 +290,7 @@ function openSheet(sel, render) {
 
 function closeSheet() {
   selection = null;
+  powerView = null;
   sheetRender = null;
   document.body.classList.remove("sheet-open");
   paintSelection();
@@ -451,21 +452,204 @@ function renderBanners() {
 
 // ------------------------------------------------------------------ plugs tab
 
+const POWER_RANGES = [["6h", "6 Std."], ["24h", "24 Std."], ["7d", "7 Tage"], ["30d", "30 Tage"], ["1y", "1 Jahr"]];
+let powerView = null; // {name, range, data, error} while the history sheet is open
+let powerRange = "24h"; // remembered between openings
+
+function fmtWatts(w) {
+  if (w === null || w === undefined) return "–";
+  if (Math.abs(w) >= 1000) return `${(w / 1000).toLocaleString("de-DE", { maximumFractionDigits: 2 })} kW`;
+  return `${Math.round(w)} W`;
+}
+
+function plugCard(p, big) {
+  const d = snap.state.devices[p.name] || {};
+  const watts = d.power === null || d.power === undefined ? "–" : Math.round(d.power);
+  const state = d.available === false ? "nicht erreichbar"
+    : d.state === "ON" ? "an" : d.state === "OFF" ? "aus" : "noch keine Meldung";
+  return el("div", { class: `card plug${big ? "" : " small"}`, role: "button", tabindex: "0", onclick: () => openPower(p.name) },
+    el("div", { class: "name" }, p.display_name, el("small", {}, `${p.is_lamp ? "Lampe" : "Steckdose"} ${state}`)),
+    el("div", { class: "watts" }, String(watts), el("small", {}, " W")),
+    el("span", { class: "chev" }, "›"));
+}
+
 function renderPlugs() {
   const plugs = config.plugs.filter((p) => !p.is_lamp);
+  const lampPlugs = config.plugs.filter((p) => p.is_lamp);
   $("#plugs-page").replaceChildren(
-    ...plugs.map((p) => {
-      const d = snap.state.devices[p.name] || {};
-      const watts = d.power === null || d.power === undefined ? "–" : Math.round(d.power);
-      const state = d.state === "ON" ? "an" : d.state === "OFF" ? "aus" : "noch keine Meldung";
-      return el("div", { class: "card plug" },
-        el("div", { class: "name" }, p.display_name, el("small", {}, `Steckdose ${state}`)),
-        el("div", { class: "watts" }, String(watts), el("small", {}, " W")));
-    }),
-    el("p", { class: "hint", style: "color:var(--muted);font-size:13px" },
-      "Nur Anzeige – diese Steckdosen werden hier bewusst nicht geschaltet. Verlauf folgt."),
+    ...plugs.map((p) => plugCard(p, true)),
+    el("p", { class: "hint" }, "Nur Anzeige – diese Steckdosen werden hier bewusst nicht geschaltet. Tippen zeigt den Verlauf."),
+    lampPlugs.length ? el("h4", { class: "section" }, "Lampen an Steckdosen") : null,
+    ...lampPlugs.map((p) => plugCard(p, false)),
   );
 }
+
+async function loadPower() {
+  const view = powerView;
+  if (!view) return;
+  try {
+    const data = await api("GET", `/api/power/${encodeURIComponent(view.name)}?range=${view.range}`);
+    if (powerView !== view) return; // closed or switched meanwhile
+    view.data = data;
+    view.error = null;
+  } catch (err) {
+    if (powerView !== view) return;
+    view.error = err.message;
+  }
+  renderSheet();
+}
+
+function openPower(name) {
+  const plug = config.plugs.find((p) => p.name === name);
+  powerView = { name, range: powerRange, data: null, error: null };
+  openSheet({ type: "plug", id: name }, () => {
+    const view = powerView;
+    const d = snap.state.devices[name] || {};
+    const data = view.data;
+    const stats = data ? [
+      ["Jetzt", fmtWatts(d.power)],
+      ["Ø", fmtWatts(data.avg_w)],
+      ["Spitze", fmtWatts(data.peak_w)],
+      ["Verbrauch", `${(data.energy_kwh ?? 0).toLocaleString("de-DE", { maximumFractionDigits: 2 })} kWh`],
+    ] : [];
+    return [
+      el("h2", {}, plug ? plug.display_name : name),
+      el("div", { class: "sub" }, "Leistung – Minutenwerte, ein Jahr gespeichert"),
+      el("div", { class: "chips" }, ...POWER_RANGES.map(([key, label]) =>
+        button(label, () => {
+          powerRange = key;
+          powerView = { name, range: key, data: null, error: null };
+          renderSheet();
+          loadPower();
+        }, `chip${view.range === key ? " active" : ""}`))),
+      view.error ? el("div", { class: "errors" }, view.error)
+        : !data ? el("div", { class: "chart-empty" }, "Lade …")
+        : data.points.length === 0 ? el("div", { class: "chart-empty" }, "Noch keine Messwerte in diesem Zeitraum.")
+        : (view.chart ||= powerChart(data)), // built once per data set: keeps the tapped value across live updates
+      el("div", { class: "stats" }, ...stats.map(([k, v]) => el("div", {}, el("small", {}, k), el("b", {}, v)))),
+    ];
+  });
+  loadPower();
+}
+
+function niceMax(v) {
+  if (v <= 0) return 10;
+  const exp = 10 ** Math.floor(Math.log10(v));
+  for (const m of [1, 2, 2.5, 5, 10]) if (v <= m * exp) return m * exp;
+  return 10 * exp;
+}
+
+function timeLabel(ts, range) {
+  const date = new Date(ts * 1000);
+  if (range === "6h" || range === "24h") return date.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  if (range === "7d") return date.toLocaleDateString("de-DE", { weekday: "short" });
+  if (range === "1y") return date.toLocaleDateString("de-DE", { month: "short" });
+  return date.toLocaleDateString("de-DE", { day: "numeric", month: "numeric" });
+}
+
+/** Round tick times in local time: full hours, midnights, month starts. */
+function timeTicks(data) {
+  const ticks = [];
+  const t = new Date(data.start * 1000);
+  let next;
+  if (data.range === "6h" || data.range === "24h") {
+    const step = data.range === "6h" ? 1 : 4;
+    t.setMinutes(0, 0, 0);
+    do t.setHours(t.getHours() + 1); while (t.getHours() % step);
+    next = () => t.setHours(t.getHours() + step);
+  } else if (data.range === "1y") {
+    t.setHours(0, 0, 0, 0);
+    t.setDate(1);
+    do t.setMonth(t.getMonth() + 1); while (t.getMonth() % 2);
+    next = () => t.setMonth(t.getMonth() + 2);
+  } else {
+    const step = data.range === "7d" ? 1 : 7;
+    t.setHours(24, 0, 0, 0);
+    if (step === 7) while (t.getDay() !== 1) t.setDate(t.getDate() + 1); // Mondays
+    next = () => t.setDate(t.getDate() + step);
+  }
+  while (t.getTime() / 1000 < data.end) {
+    ticks.push(t.getTime() / 1000);
+    next();
+  }
+  return ticks;
+}
+
+function pointLabel(ts, range) {
+  const date = new Date(ts * 1000);
+  if (range === "1y") return date.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "short" });
+  return date.toLocaleString("de-DE", { weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function powerChart(data) {
+  const W = 600, H = 230, L = 52, R = 10, T = 12, B = 26;
+  const span = data.end - data.start;
+  const ymax = niceMax(Math.max(...data.points.map((p) => p[2])) * 1.05);
+  const x = (ts) => L + ((ts - data.start) / span) * (W - L - R);
+  const y = (w) => T + (1 - w / ymax) * (H - T - B);
+  const half = data.bucket_s / 2;
+
+  // split into runs where buckets follow each other (a gap = app or Z2M was down)
+  const runs = [];
+  let run = [];
+  for (const p of data.points) {
+    if (run.length && p[0] - run[run.length - 1][0] > data.bucket_s * 1.5) { runs.push(run); run = []; }
+    run.push(p);
+  }
+  if (run.length) runs.push(run);
+
+  const chart = svg("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": "Leistungsverlauf" });
+  for (const frac of [0, 0.5, 1]) {
+    const yy = y(ymax * frac);
+    chart.append(svg("line", { x1: L, x2: W - R, y1: yy, y2: yy, class: frac === 0 ? "axis" : "grid" }));
+    const label = svg("text", { x: L - 6, y: yy + 4, class: "ylabel" });
+    label.textContent = fmtWatts(ymax * frac);
+    chart.append(label);
+  }
+  for (const ts of timeTicks(data)) {
+    const xx = x(ts);
+    chart.append(svg("line", { x1: xx, x2: xx, y1: T, y2: H - B, class: "vgrid" }));
+    if (xx < L + 22 || xx > W - R - 22) continue; // label would stick out
+    const label = svg("text", { x: xx, y: H - 6, class: "xlabel", "text-anchor": "middle" });
+    label.textContent = timeLabel(ts, data.range);
+    chart.append(label);
+  }
+  const showPeak = data.bucket_s > data.sample_s;
+  for (const r of runs) {
+    const pts = r.map((p) => [x(p[0] + half), y(p[1])]);
+    if (pts.length === 1) pts.push([pts[0][0] + 2, pts[0][1]]);
+    const line = pts.map(([a, b]) => `${a.toFixed(1)},${b.toFixed(1)}`).join(" ");
+    const base = y(0).toFixed(1);
+    chart.append(svg("polygon", { points: `${pts[0][0].toFixed(1)},${base} ${line} ${pts[pts.length - 1][0].toFixed(1)},${base}`, class: "area" }));
+    if (showPeak) {
+      chart.append(svg("polyline", { points: r.map((p) => `${x(p[0] + half).toFixed(1)},${y(p[2]).toFixed(1)}`).join(" "), class: "peak" }));
+    }
+    chart.append(svg("polyline", { points: line, class: "avg" }));
+  }
+
+  // touch / hover readout
+  const cursor = svg("line", { y1: T, y2: H - B, class: "cursor", visibility: "hidden" });
+  chart.append(cursor);
+  const readout = el("div", { class: "readout" }, showPeak ? "Fläche = Durchschnitt, Linie oben = Spitze" : "Tippen für Einzelwerte");
+  const pick = (event) => {
+    const box = chart.getBoundingClientRect();
+    const sx = ((event.clientX - box.left) / box.width) * W;
+    const ts = data.start + ((sx - L) / (W - L - R)) * span;
+    let best = data.points[0];
+    for (const p of data.points) if (Math.abs(p[0] + half - ts) < Math.abs(best[0] + half - ts)) best = p;
+    cursor.setAttribute("x1", x(best[0] + half));
+    cursor.setAttribute("x2", x(best[0] + half));
+    cursor.setAttribute("visibility", "visible");
+    readout.textContent = `${pointLabel(best[0], data.range)} · ` +
+      (showPeak ? `Ø ${fmtWatts(best[1])} · Spitze ${fmtWatts(best[2])}` : fmtWatts(best[1]));
+  };
+  chart.addEventListener("pointerdown", pick);
+  chart.addEventListener("pointermove", (e) => { if (e.buttons || e.pointerType === "mouse") pick(e); });
+  return el("div", { class: "chart-wrap" }, chart, readout);
+}
+
+// refresh an open history sheet once a minute (new samples arrive every minute)
+setInterval(() => { if (powerView && document.visibilityState === "visible") loadPower(); }, 60000);
 
 // ------------------------------------------------------------------ settings tab
 
